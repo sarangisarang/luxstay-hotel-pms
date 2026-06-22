@@ -58,12 +58,18 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Email already registered: " + request.getEmail());
         }
 
-        // 1. Convert role string to enum safely
-        Role selectedRole;
-        try {
-            selectedRole = request.getRole();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid role: " + request.getRole());
+        // 1. Resolve role — SECURITY: public self-registration may ONLY create a
+        //    regular USER (guest) account. Privileged roles (ADMIN, RECEPTION) must be
+        //    provisioned by an existing administrator, never granted through this public
+        //    endpoint. Trusting request.getRole() verbatim was a privilege-escalation
+        //    hole: any anonymous caller could self-assign ADMIN.
+        Role selectedRole = request.getRole();
+        if (selectedRole == null) {
+            selectedRole = Role.USER;
+        } else if (selectedRole != Role.USER) {
+            throw new IllegalArgumentException(
+                    "Self-registration is only permitted for guest accounts. "
+                    + "Staff and administrator accounts must be created by an administrator.");
         }
 
         // 2. Build AppUser (system user)
