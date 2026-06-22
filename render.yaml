@@ -1,0 +1,78 @@
+databases:
+  - name: luxstay-db
+    databaseName: booking
+    user: booking_user
+    plan: free
+
+services:
+  # ── Spring Boot Backend ──────────────────────────────────────────────────
+  - type: web
+    name: luxstay-backend
+    plan: free
+    runtime: docker
+    dockerfilePath: ./beckend/hotel/Dockerfile
+    dockerContext: ./beckend/hotel
+    envVars:
+      - key: DB_URL
+        fromDatabase:
+          name: luxstay-db
+          property: connectionString
+      - key: DB_USER
+        fromDatabase:
+          name: luxstay-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: luxstay-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        value: sk_test_REPLACE_ME
+      - key: STRIPE_PUBLISHABLE_KEY
+        value: pk_test_REPLACE_ME
+      - key: STRIPE_WEBHOOK_SECRET
+        value: whsec_dev_dummy
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USER
+        sync: false
+      - key: MAIL_PASS
+        sync: false
+      - key: MAIL_FROM
+        value: noreply@luxstay.com
+      - key: GROQ_API_KEY
+        sync: false
+      - key: APP_SERVER_URL
+        fromService:
+          name: luxstay-backend
+          type: web
+          property: host
+      - key: ALLOWED_ORIGINS
+        fromService:
+          name: luxstay-frontend
+          type: web
+          property: host
+
+  # ── Next.js Frontend ─────────────────────────────────────────────────────
+  - type: web
+    name: luxstay-frontend
+    plan: free
+    runtime: docker
+    dockerfilePath: ./frontend/HotelBooking/Dockerfile
+    dockerContext: ./frontend/HotelBooking
+    dockerBuildArgs:
+      - BACKEND_URL=https://luxstay-backend.onrender.com
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          name: luxstay-backend
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_API_BASE
+        fromService:
+          name: luxstay-backend
+          type: web
+          property: host
