@@ -1,0 +1,109 @@
+/* ── Feedback Stats Card ───────────────────────────────────────── */
+.statsCard {
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,.08));
+}
+
+.statsRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+/* ── Score blocks ──────────────────────────────────────────────── */
+.scoreBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.scoreValue {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--color-text, #0f172a);
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.scoreLabel {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+    text-align: center;
+}
+
+.scoreSubLabel {
+    font-size: 0.72rem;
+    color: var(--color-text-muted, #94a3b8);
+    margin-top: 4px;
+    text-align: center;
+}
+
+.stars {
+    font-size: 1.2rem;
+    color: #f59e0b;
+    margin-top: 6px;
+    letter-spacing: 2px;
+}
+
+/* ── Distribution bars ─────────────────────────────────────────── */
+.distBlock {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.distRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.distStar {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-muted, #64748b);
+    min-width: 24px;
+    text-align: right;
+}
+
+.distBar {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 10px;
+    border-radius: 999px;
+    border: none;
+    display: block;
+}
+.distBar::-webkit-progress-bar { background: var(--color-border, #e2e8f0); border-radius: 999px; }
+
+.star1::-webkit-progress-value { background: #dc2626; border-radius: 999px; }
+.star1::-moz-progress-bar      { background: #dc2626; border-radius: 999px; }
+.star2::-webkit-progress-value { background: #f97316; border-radius: 999px; }
+.star2::-moz-progress-bar      { background: #f97316; border-radius: 999px; }
+.star3::-webkit-progress-value { background: #f59e0b; border-radius: 999px; }
+.star3::-moz-progress-bar      { background: #f59e0b; border-radius: 999px; }
+.star4::-webkit-progress-value { background: #84cc16; border-radius: 999px; }
+.star4::-moz-progress-bar      { background: #84cc16; border-radius: 999px; }
+.star5::-webkit-progress-value { background: #22c55e; border-radius: 999px; }
+.star5::-moz-progress-bar      { background: #22c55e; border-radius: 999px; }
+
+.distCount {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #64748b);
+    min-width: 20px;
+    text-align: right;
+}

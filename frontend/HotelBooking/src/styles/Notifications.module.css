@@ -1,0 +1,102 @@
+/* ── Notifications Page ─────────────────────────────────────── */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    transition: background 150ms ease;
+}
+
+.itemUnread {
+    border-left: 3px solid #6366f1;
+    background: var(--color-surface);
+}
+
+.itemRead {
+    opacity: 0.65;
+    border-left: 3px solid transparent;
+}
+
+.itemIcon {
+    font-size: 1.4rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.itemBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.itemTitle {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--color-text);
+    margin-bottom: 3px;
+}
+
+.itemMsg {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.45;
+    margin-bottom: 6px;
+}
+
+.itemMeta {
+    font-size: 0.75rem;
+    color: var(--color-text-xs, var(--color-text-muted));
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rolePill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #ede9fe;
+    color: #6d28d9;
+    letter-spacing: 0.04em;
+}
+
+.readBtn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-border);
+    background: transparent;
+    color: #6366f1;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.readBtn:hover {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+.empty {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+}

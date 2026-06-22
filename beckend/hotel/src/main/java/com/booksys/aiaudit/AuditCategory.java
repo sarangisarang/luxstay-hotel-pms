@@ -1,0 +1,19 @@
+package com.booksys.aiaudit;
+
+public enum AuditCategory {
+    ARCHITECTURE,
+    RAG_KNOWLEDGE_BASE,
+    VECTOR_DB,
+    HALLUCINATION,
+    HUMAN_HANDOFF,
+    AUTOMATION_TOOLS,
+    MONITORING_RETRY,
+    LIVE_DEMO,
+    INTEGRATIONS,
+    SECURITY_SECRETS,
+    CUSTOMER_DATA,
+    FALLBACK,
+    HOSTING_STACK,
+    CODE_QUALITY,
+    OWNERSHIP_EXIT
+}

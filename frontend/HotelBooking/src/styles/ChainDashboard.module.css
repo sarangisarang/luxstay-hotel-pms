@@ -1,0 +1,110 @@
+/* ── Chain Dashboard ────────────────────────────────────────── */
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpiCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--kpi-accent, #6366f1);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.kpiLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+}
+
+.kpiValue {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+}
+
+.kpiSub {
+    font-size: 0.75rem;
+    color: var(--color-text-xs);
+    margin-top: 4px;
+}
+
+/* ── Charts ─────────────────────────────────────────────────── */
+.chartCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.chartTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 2px;
+}
+
+.chartSub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+}
+
+/* ── KPI accent variants ─────────────────────────────────────── */
+.accentIndigo  { border-top-color: #6366f1; }
+.accentBlue    { border-top-color: #3b82f6; }
+.accentGreen   { border-top-color: #22c55e; }
+.accentAmber   { border-top-color: #f59e0b; }
+.accentPurple  { border-top-color: #8b5cf6; }
+.accentPink    { border-top-color: #ec4899; }
+.accentTeal    { border-top-color: #14b8a6; }
+.accentSlate   { border-top-color: #94a3b8; }
+
+/* ── Avatar color variants ──────────────────────────────────── */
+.avColor0 { background: #6366f1; }
+.avColor1 { background: #22c55e; }
+.avColor2 { background: #f59e0b; }
+.avColor3 { background: #3b82f6; }
+.avColor4 { background: #8b5cf6; }
+.avColor5 { background: #ec4899; }
+.avColor6 { background: #14b8a6; }
+.avColor7 { background: #f97316; }
+
+/* ── Occupancy bar ──────────────────────────────────────────── */
+.occCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.occBar {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 64px;
+    height: 6px;
+    border-radius: 3px;
+    border: none;
+    flex-shrink: 0;
+    display: block;
+}
+.occBar::-webkit-progress-bar   { background: var(--color-border); border-radius: 3px; }
+.occBar::-webkit-progress-value { background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 3px; }
+.occBar::-moz-progress-bar      { background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 3px; }
+
+.tableScroll {
+    overflow-x: auto;
+}
+
+.revParCell {
+    font-weight: 700;
+}

@@ -1,0 +1,132 @@
+/* ── KPI page ──────────────────────────────────────────────────── */
+.title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text, #0f172a);
+    margin-bottom: 16px;
+}
+
+/* ── Summary cards ─────────────────────────────────────────────── */
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.summaryCard {
+    background: var(--color-surface, #fff);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm, 0 1px 6px rgba(0,0,0,0.08));
+    border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.summaryValue {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.summaryValueGreen   { color: #22c55e; }
+.summaryValueBlue    { color: #3b82f6; }
+.summaryValueAmber   { color: #f59e0b; }
+.summaryValuePurple  { color: #8b5cf6; }
+
+.summaryLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #64748b);
+    margin-top: 6px;
+}
+
+.summaryPeriod {
+    font-size: 0.7rem;
+    color: var(--color-text-muted, #94a3b8);
+    margin-top: 2px;
+}
+
+/* ── Section cards ─────────────────────────────────────────────── */
+.section {
+    background: var(--color-surface, #fff);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm, 0 1px 6px rgba(0,0,0,0.08));
+    overflow: hidden;
+    margin-bottom: 32px;
+    border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.sectionHeader {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-text, #0f172a);
+}
+
+/* ── Mini bar (progress element) ───────────────────────────────── */
+.miniBar {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    min-width: 80px;
+    height: 8px;
+    border-radius: 4px;
+    border: none;
+    background: var(--color-surface-2, #f1f5f9);
+    display: block;
+}
+
+.miniBar::-webkit-progress-bar {
+    background: var(--color-surface-2, #f1f5f9);
+    border-radius: 4px;
+}
+
+.miniBar::-webkit-progress-value {
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.miniBarBlue::-webkit-progress-value  { background: #3b82f6; }
+.miniBarAmber::-webkit-progress-value { background: #f59e0b; }
+.miniBarPurple::-webkit-progress-value { background: #8b5cf6; }
+
+.miniBar::-moz-progress-bar {
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.miniBarBlue::-moz-progress-bar  { background: #3b82f6; }
+.miniBarAmber::-moz-progress-bar { background: #f59e0b; }
+.miniBarPurple::-moz-progress-bar { background: #8b5cf6; }
+
+/* ── Table helpers ─────────────────────────────────────────────── */
+.tableScroll { overflow-x: auto; }
+.trendCol    { min-width: 100px; }
+.monthLatest { font-weight: 700; }
+
+/* ── Occupancy color ───────────────────────────────────────────── */
+.occHigh { color: #22c55e; font-weight: 700; }
+.occMid  { color: #f59e0b; font-weight: 700; }
+.occLow  { color: #ef4444; font-weight: 700; }
+
+/* ── Row highlights ────────────────────────────────────────────── */
+.latestRow { background: #fefce8 !important; }
+.todayRow  { background: #eff6ff !important; }
+
+/* ── Forecast chips ────────────────────────────────────────────── */
+.occChip {
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+.occChipFilled { background: #dbeafe; color: #1d4ed8; }
+.occChipEmpty  { background: var(--color-surface-2, #f1f5f9); color: #6b7280; }
+
+.checkIn  { color: #22c55e; font-weight: 700; }
+.checkOut { color: #ef4444; font-weight: 700; }
+.dash     { color: var(--color-text-muted, #94a3b8); }
+
+.todayLabel { color: #2563eb; font-weight: 700; }

@@ -1,0 +1,143 @@
+/* ── Pricing Calendar ───────────────────────────────────────── */
+
+.controlLabel {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.legendSwatchLow  { background: #f0fdf4; }
+.legendSwatchMid  { background: #fde68a; }
+.legendSwatchPeak { background: #f87171; }
+
+.emptyNote {
+    text-align: center;
+    padding: 32px;
+    color: var(--color-text-muted);
+}
+
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.dateInput {
+    padding: 8px 12px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    font-family: inherit;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    flex-wrap: wrap;
+}
+
+.legendSwatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* ── Calendar grid ──────────────────────────────────────────── */
+.tableWrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+}
+
+.calTable {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+    font-size: 0.8rem;
+}
+
+.calTable th {
+    padding: 8px 6px;
+    background: var(--color-surface-2, #f8fafc);
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+    font-size: 0.72rem;
+}
+
+.calTable td {
+    padding: 0;
+    border: 1px solid var(--color-border);
+    vertical-align: top;
+}
+
+/* ── Date header ────────────────────────────────────────────── */
+.dayHeader {
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-2, #f8fafc);
+}
+
+.dayHeader.weekend {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+.dayHeader.today {
+    background: #6366f1;
+    color: white;
+}
+
+/* ── Rate cell ──────────────────────────────────────────────── */
+.rateCell {
+    padding: 5px 6px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: default;
+    transition: filter 100ms ease;
+}
+
+.rateCell:hover {
+    filter: brightness(0.9);
+}
+
+/* ── Heat colours (low → high) ───────────────────────────────── */
+.heat0 { background: #f0fdf4; }
+.heat1 { background: #dcfce7; }
+.heat2 { background: #bbf7d0; }
+.heat3 { background: #fef3c7; }
+.heat4 { background: #fde68a; }
+.heat5 { background: #fcd34d; }
+.heat6 { background: #fca5a5; }
+.heat7 { background: #f87171; }
+
+/* ── Room type header column ─────────────────────────────────── */
+.rtHeader {
+    min-width: 120px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--color-surface);
+}

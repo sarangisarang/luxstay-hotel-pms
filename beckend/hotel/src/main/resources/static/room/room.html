@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room Management</title>
+    <link rel="stylesheet" href="room.css" />
+</head>
+<body>
+
+<h1>Create a New Room</h1>
+
+<div class="form-container">
+    <form id="roomForm">
+        <label for="hotelSelect">Select Hotel:</label>
+        <select id="hotelSelect" required>
+            <option value="" disabled selected>Select Hotel</option>
+        </select>
+
+        <label for="roomTypeSelect">Select Room Type:</label>
+        <select id="roomTypeSelect" required>
+            <option value="" disabled selected>Select Room Type</option>
+        </select>
+
+        <label for="statusSelect">Room Status:</label>
+        <select id="statusSelect" required>
+            <option value="free">Free</option>
+            <option value="reserved">Reserved</option>
+            <option value="occupaid">Occupied</option>
+        </select>
+
+        <button type="submit">Save Room</button>
+    </form>
+</div>
+
+<h2>All Rooms</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Room ID</th>
+        <th>Hotel</th>
+        <th>Room Type</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody id="roomTableBody"></tbody>
+</table>
+
+<script src="room.js"></script>
+</body>
+</html>
+

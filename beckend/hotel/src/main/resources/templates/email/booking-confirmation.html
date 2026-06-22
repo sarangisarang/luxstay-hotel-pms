@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Booking Confirmed</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background:#f1f5f9; color:#1e293b; }
+    .wrapper { max-width:600px; margin:32px auto; background:white;
+               border-radius:16px; overflow:hidden;
+               box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .hero { background:linear-gradient(135deg,#4f46e5,#7c3aed);
+            padding:40px 40px 32px; text-align:center; }
+    .hero-icon { font-size:3rem; display:block; margin-bottom:12px; }
+    .hero h1 { color:white; font-size:1.75rem; font-weight:800; }
+    .hero p  { color:rgba(255,255,255,.8); font-size:0.95rem; margin-top:6px; }
+    .body  { padding:32px 40px; }
+    .greeting { font-size:1.1rem; color:#0f172a; margin-bottom:24px; }
+    .card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;
+            padding:24px; margin-bottom:24px; }
+    .card-row { display:flex; justify-content:space-between; align-items:center;
+                padding:10px 0; border-bottom:1px solid #e2e8f0; }
+    .card-row:last-child { border-bottom:none; }
+    .card-label { font-size:0.8rem; font-weight:700; color:#64748b;
+                  text-transform:uppercase; letter-spacing:.04em; }
+    .card-value { font-size:0.95rem; font-weight:600; color:#0f172a; text-align:right; }
+    .total-row { background:linear-gradient(135deg,#4f46e5,#7c3aed);
+                 border-radius:10px; padding:16px 20px;
+                 display:flex; justify-content:space-between; align-items:center;
+                 margin-bottom:28px; }
+    .total-label { color:rgba(255,255,255,.85); font-size:.85rem; font-weight:600; }
+    .total-value { color:white; font-size:1.4rem; font-weight:800; }
+    .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px;
+            padding:14px 18px; font-size:0.875rem; color:#1d4ed8; margin-bottom:28px; }
+    .footer { text-align:center; padding:20px 40px 32px; background:#f8fafc;
+              border-top:1px solid #e2e8f0; }
+    .footer p { font-size:0.8rem; color:#94a3b8; line-height:1.6; }
+    .badge { display:inline-block; background:#dcfce7; color:#166534;
+             font-size:0.75rem; font-weight:700; padding:3px 10px;
+             border-radius:20px; letter-spacing:.03em; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="hero">
+    <span class="hero-icon">🏨</span>
+    <h1>Booking Confirmed!</h1>
+    <p>Your reservation is all set. We look forward to welcoming you.</p>
+  </div>
+
+  <div class="body">
+    <p class="greeting">
+      Dear <strong th:text="${guestName}">Guest</strong>,<br/>
+      Thank you for choosing <strong th:text="${hotel}">LuxStay Hotel</strong>.
+      Your booking has been confirmed and payment received.
+    </p>
+
+    <div class="card">
+      <div class="card-row">
+        <span class="card-label">Booking ID</span>
+        <span class="card-value">
+          <span class="badge" th:text="'#' + ${bookingId}">#ABCD1234</span>
+        </span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Hotel</span>
+        <span class="card-value" th:text="${hotel}">Grand Hotel</span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Room</span>
+        <span class="card-value" th:text="'Room ' + ${room}">Room 101</span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Check-in</span>
+        <span class="card-value" th:text="${checkIn}">01 Jun 2026</span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Check-out</span>
+        <span class="card-value" th:text="${checkOut}">05 Jun 2026</span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Duration</span>
+        <span class="card-value" th:text="${nights} + ' night(s)'">4 night(s)</span>
+      </div>
+    </div>
+
+    <div class="total-row">
+      <span class="total-label">Total Charged</span>
+      <span class="total-value" th:text="'€' + ${#numbers.formatDecimal(total,1,'POINT',2,'COMMA')}">€480.00</span>
+    </div>
+
+    <div class="note">
+      📋 <strong>What to bring:</strong> a valid photo ID and this confirmation email.
+      Check-in is from 14:00, check-out by 11:00.
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>
+      Questions? Reply to this email or call our front desk.<br/>
+      <strong>LuxStay Hotel Management</strong><br/>
+      This is an automated message — please do not reply directly.
+    </p>
+  </div>
+</div>
+</body>
+</html>

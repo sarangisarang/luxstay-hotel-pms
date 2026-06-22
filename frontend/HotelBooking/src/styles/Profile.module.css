@@ -1,0 +1,340 @@
+/* ── Profile Page ───────────────────────────────────────────── */
+.wrapper {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Card shell ─────────────────────────────────────────────── */
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── Gradient header ────────────────────────────────────────── */
+.cardHeader {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+    padding: 28px 28px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.headerIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    flex-shrink: 0;
+}
+.headerTitle {
+    color: white;
+    font-weight: 800;
+    font-size: 1.15rem;
+    margin: 0;
+}
+.headerSub {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    margin: 2px 0 0;
+}
+
+/* ── Card body ──────────────────────────────────────────────── */
+.cardBody {
+    padding: 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── Info row ───────────────────────────────────────────────── */
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.infoLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+.infoValue {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 0.9rem;
+}
+
+/* ── Role pill ──────────────────────────────────────────────── */
+.rolePill {
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+}
+.rolePillAdmin     { background: #fee2e2; color: #b91c1c; }
+.rolePillReception { background: #dbeafe; color: #1d4ed8; }
+.rolePillUser      { background: #dcfce7; color: #15803d; }
+.rolePillDefault   { background: #f1f5f9; color: #475569; }
+
+/* ── Loyalty card ───────────────────────────────────────────── */
+.loyaltyHeader {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.loyaltyIconWrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.loyaltyTitle {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    margin: 0;
+}
+.loyaltySub {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+.loyaltyBody {
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+.tierBadge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
+}
+.tierIcon {
+    font-size: 2rem;
+    line-height: 1;
+}
+.tierName {
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+}
+.tierPlatinum { color: #7c3aed; }
+.tierGold     { color: #ca8a04; }
+.tierSilver   { color: #64748b; }
+.tierBronze   { color: #b45309; }
+.loyaltyStats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+.loyaltyStat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+.loyaltyStatVal {
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* ── Password card ──────────────────────────────────────────── */
+.pwHeader {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.pwIconWrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.pwTitle {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    margin: 0;
+}
+.pwSub {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+.pwForm {
+    padding: 20px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.fieldLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 6px;
+}
+.fieldWrap {
+    position: relative;
+}
+.fieldInput {
+    width: 100%;
+    padding: 10px 40px 10px 12px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    outline: none;
+    font-family: inherit;
+    color: var(--color-text);
+    background: var(--color-surface-2, var(--color-surface));
+    box-sizing: border-box;
+}
+.fieldToggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 2px;
+    display: flex;
+}
+.alertError {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #b91c1c;
+    font-size: 0.85rem;
+}
+.alertSuccess {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #15803d;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.submitBtn {
+    padding: 12px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+}
+.submitBtn:disabled {
+    background: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* ── Status badge ───────────────────────────────────────────── */
+.statusBadge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+}
+.statusConfirmed  { background: #dcfce7; color: #16a34a; }
+.statusCheckedIn  { background: #dbeafe; color: #2563eb; }
+.statusCheckedOut { background: #f1f5f9; color: #64748b; }
+.statusCompleted  { background: #ede9fe; color: #7c3aed; }
+.statusCancelled  { background: #fee2e2; color: #dc2626; }
+.statusPending    { background: #fef3c7; color: #d97706; }
+.statusDefault    { background: #f1f5f9; color: #64748b; }
+
+/* ── Bookings mini-table ────────────────────────────────────── */
+.bkHeader {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.bkIconWrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.bkTitle {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    margin: 0;
+}
+.bkBody {
+    padding: 16px 28px 20px;
+    overflow-x: auto;
+}
+.bkEmpty {
+    color: var(--color-text-muted);
+    font-size: 0.88rem;
+    text-align: center;
+    padding: 12px 0;
+}
+
+/* state screens */
+.stateWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+.errorWrap {
+    max-width: 480px;
+    margin: 80px auto;
+    padding: 24px;
+    background: #fef2f2;
+    border-radius: 14px;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    text-align: center;
+}

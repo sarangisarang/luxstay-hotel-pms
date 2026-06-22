@@ -1,0 +1,129 @@
+/* ── AI Assistant Chat ───────────────────────────────────────────── */
+
+.page { padding: 24px; max-width: 860px; margin: 0 auto; }
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+
+.avatarLg {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#6366f1,#8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.h1     { font-size: 22px; font-weight: 700; margin: 0; }
+.online { font-size: 12px; color: #22c55e; margin-top: 2px; }
+
+/* ── Quick prompts ──────────────────────────────────────────────── */
+.quickBar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+.quickBtn {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* ── Chat window ────────────────────────────────────────────────── */
+.chatWindow {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+    height: 480px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+/* ── Message row ────────────────────────────────────────────────── */
+.msgRow      { display: flex; margin-bottom: 14px; }
+.msgRowUser  { justify-content: flex-end; }
+.msgRowAssist { justify-content: flex-start; }
+
+.avatarSm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+}
+
+.avatarBot  { background: linear-gradient(135deg,#6366f1,#8b5cf6); margin-right: 8px; }
+.avatarUser { background: #e0e7ff; margin-left: 8px; }
+
+.bubbleWrap { max-width: 75%; }
+
+.bubbleUser {
+    background: #2563eb;
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    white-space: pre-wrap;
+}
+
+.bubbleAssist {
+    background: #fff;
+    color: #1e293b;
+    border-radius: 16px 16px 16px 4px;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    white-space: pre-wrap;
+}
+
+.timeUser   { font-size: 11px; color: #94a3b8; margin-top: 3px; text-align: right; }
+.timeAssist { font-size: 11px; color: #94a3b8; margin-top: 3px; text-align: left; }
+
+/* ── Typing indicator ───────────────────────────────────────────── */
+.typing { display: flex; align-items: center; gap: 8px; color: #94a3b8; font-size: 13px; }
+
+.typingBubble {
+    background: #fff;
+    border-radius: 16px 16px 16px 4px;
+    padding: 10px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.dots { letter-spacing: 3px; }
+
+/* ── Input row ──────────────────────────────────────────────────── */
+.inputRow { display: flex; gap: 10px; }
+
+.textInput {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+}
+
+.btnSend {
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+}
+.btnSend:disabled { opacity: 0.5; cursor: not-allowed; }

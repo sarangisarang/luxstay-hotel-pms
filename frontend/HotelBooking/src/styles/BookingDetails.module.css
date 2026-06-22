@@ -1,0 +1,49 @@
+/* Header: title + status same row (mobile-ზე იტეხება) */
+.headerRow{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom:18px;
+}
+@media (max-width:640px){
+    .headerRow{ flex-direction:column; align-items:flex-start; gap:8px; }
+}
+
+/* Cards grid */
+.cardsGrid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap:14px;
+}
+
+/* Card ( .section) */
+.card{
+    padding:16px;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    background:#f9fafb;
+    transition: box-shadow .15s ease, border-color .15s ease;
+    height:100%;
+}
+.card:hover{ box-shadow:0 6px 18px rgba(2,6,23,.08); border-color:#e2e8f0; }
+
+.card h3{
+    font-size:1.05rem; font-weight:800; margin:0 0 10px; color:#111827; display:flex; gap:8px; align-items:center;
+}
+.card p{ margin:6px 0; font-size:.96rem; color:#0f172a; font-weight:650; }
+
+/* Title */
+.title{ font-size:1.6rem; font-weight:900; color:#0b1220; letter-spacing:-.01em; display:flex; gap:8px; align-items:center; margin:0; }
+
+/* Status pill */
+.status{
+    padding:6px 12px; border-radius:999px; font-size:.82rem; font-weight:800; letter-spacing:.04em; line-height:1; border:1px solid transparent;
+}
+.pending{ background:#fff7ed; color:#c2410c; border-color:#f97316; }
+.paid{ background:#ecfdf5; color:#047857; border-color:#10b981; }
+.slate{ background:#f1f5f9; color:#1f2937; border-color:#e5e7eb; }
+
+/* Prices stronger */
+.priceStrong{ font-weight:900; color:#0b1220; font-variant-numeric: tabular-nums; }
+
+/* Services chips row */
+.services{ display:flex; gap:10px; flex-wrap:wrap; }
+.serviceTag{ background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe; font-size:.88rem; padding:6px 10px; border-radius:12px; font-weight:800; }

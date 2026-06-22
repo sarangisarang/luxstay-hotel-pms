@@ -1,0 +1,389 @@
+/* ── Page shell ─────────────────────────────────────────── */
+.page {
+    min-height: 100vh;
+    background: #f8fafc;
+    padding-bottom: 64px;
+}
+
+/* ── Hero header ────────────────────────────────────────── */
+.hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+    padding: 24px 24px 48px;
+}
+
+.heroInner {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    font-family: inherit;
+}
+
+.heroTitle {
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.heroSub {
+    color: rgba(255, 255, 255, 0.72);
+    margin-top: 6px;
+    font-size: 0.95rem;
+}
+
+/* ── Main grid ──────────────────────────────────────────── */
+.grid {
+    max-width: 980px;
+    margin: -28px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 760px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Card ───────────────────────────────────────────────── */
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 4px rgba(15, 23, 42, 0.04);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.cardSticky {
+    composes: card;
+    position: sticky;
+    top: 24px;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fafbfc;
+}
+
+.iconBubble {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4f46e5;
+    flex-shrink: 0;
+}
+
+.cardTitle {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #0f172a;
+    margin: 0;
+}
+
+.cardSub {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.cardBody {
+    padding: 20px 24px 24px;
+}
+
+.cardBodyFlex {
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Field ──────────────────────────────────────────────── */
+.fieldGrid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.fieldGrid2mt {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.fieldLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 6px;
+}
+
+.fieldInput {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    outline: none;
+    font-family: inherit;
+    color: #0f172a;
+    background: #f8fafc;
+    box-sizing: border-box;
+}
+
+/* ── Services list ──────────────────────────────────────── */
+.servicesList {
+    padding: 16px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.serviceItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    transition: border-color 150ms, background 150ms;
+}
+
+.serviceItemChecked {
+    border: 2px solid #6366f1;
+    background: #eef2ff;
+}
+
+.serviceCheckbox {
+    accent-color: #6366f1;
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
+.serviceInfo {
+    flex: 1;
+}
+
+.serviceName {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #0f172a;
+}
+
+.serviceDesc {
+    font-size: 0.76rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.servicePrice {
+    font-weight: 800;
+    color: #4f46e5;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* ── Error alert ────────────────────────────────────────── */
+.errorAlert {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: #b91c1c;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* ── Submit button ──────────────────────────────────────── */
+.submitBtn {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed 60%, #9333ea);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(79, 70, 229, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: inherit;
+}
+
+.submitBtnDisabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ── Summary sidebar ────────────────────────────────────── */
+.summaryImg {
+    height: 180px;
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+}
+
+.summaryImg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.summaryImgFallback {
+    height: 120px;
+    background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summaryMeta {
+    padding: 20px 20px 8px;
+}
+
+.summaryTypeBadge {
+    background: #ede9fe;
+    color: #7c3aed;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.summaryRoomName {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #0f172a;
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
+.summaryHotel {
+    font-size: 0.83rem;
+    color: #64748b;
+    margin-top: 2px;
+    margin-bottom: 0;
+}
+
+.summaryDivider {
+    border-top: 1px solid #f1f5f9;
+    margin: 0 20px;
+}
+
+.summaryRows {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.summaryRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summaryRowLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.83rem;
+    color: #64748b;
+}
+
+.summaryRowValue {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.summaryPricing {
+    padding: 16px 20px 20px;
+}
+
+.summaryPriceRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.summaryPriceLabel {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.summaryPriceValue {
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.summaryTotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f0fdf4;
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid #bbf7d0;
+}
+
+.summaryTotalLabel {
+    font-weight: 700;
+    color: #15803d;
+}
+
+.summaryTotalValue {
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #15803d;
+}

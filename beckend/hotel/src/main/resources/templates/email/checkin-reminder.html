@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Check-in Tomorrow</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:#f1f5f9; color:#1e293b; }
+    .wrapper { max-width:600px; margin:32px auto; background:white;
+               border-radius:16px; overflow:hidden;
+               box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .hero { background:linear-gradient(135deg,#059669,#0284c7);
+            padding:36px 40px; text-align:center; }
+    .hero h1 { color:white; font-size:1.6rem; font-weight:800; }
+    .hero p  { color:rgba(255,255,255,.8); margin-top:6px; }
+    .body { padding:32px 40px; }
+    .item { display:flex; gap:12px; align-items:flex-start; padding:14px 0;
+            border-bottom:1px solid #f1f5f9; }
+    .item:last-child { border-bottom:none; }
+    .icon { font-size:1.4rem; flex-shrink:0; }
+    .item-label { font-size:0.8rem; color:#64748b; font-weight:600;
+                  text-transform:uppercase; letter-spacing:.04em; }
+    .item-value { font-size:1rem; font-weight:700; color:#0f172a; margin-top:2px; }
+    .footer { text-align:center; padding:20px 40px 28px; background:#f8fafc;
+              border-top:1px solid #e2e8f0; font-size:0.8rem; color:#94a3b8; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="hero">
+    <h1>🌅 Check-in Tomorrow!</h1>
+    <p>We're getting your room ready, <span th:text="${guestName}">Guest</span>.</p>
+  </div>
+  <div class="body">
+    <div class="item">
+      <span class="icon">🏨</span>
+      <div>
+        <div class="item-label">Hotel</div>
+        <div class="item-value" th:text="${hotel}">Grand Hotel</div>
+      </div>
+    </div>
+    <div class="item">
+      <span class="icon">🚪</span>
+      <div>
+        <div class="item-label">Room</div>
+        <div class="item-value" th:text="'Room ' + ${room}">Room 101</div>
+      </div>
+    </div>
+    <div class="item">
+      <span class="icon">📅</span>
+      <div>
+        <div class="item-label">Check-in Date</div>
+        <div class="item-value" th:text="${checkIn}">01 Jun 2026</div>
+      </div>
+    </div>
+    <div class="item">
+      <span class="icon">🕑</span>
+      <div>
+        <div class="item-label">Check-in Time</div>
+        <div class="item-value">From 14:00 onwards</div>
+      </div>
+    </div>
+    <div class="item">
+      <span class="icon">🪪</span>
+      <div>
+        <div class="item-label">Please bring</div>
+        <div class="item-value">Valid photo ID + booking confirmation</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>See you tomorrow! — <strong>LuxStay Hotel</strong></p>
+  </div>
+</div>
+</body>
+</html>

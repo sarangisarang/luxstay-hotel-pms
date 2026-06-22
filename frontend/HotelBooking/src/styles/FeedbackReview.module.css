@@ -1,0 +1,75 @@
+/* ── Auto-detected guest card ───────────────────────────── */
+.guestCard {
+    background: #f0f4ff;
+    border: 1.5px solid #c7d2fe;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guestAvatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.guestName {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1e1b4b;
+}
+
+.guestMeta {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+/* ── Stay radio options ─────────────────────────────────── */
+.stayList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stayOption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    transition: border-color 150ms, background 150ms;
+}
+
+.stayOption.selected {
+    border: 2px solid #6366f1;
+    background: #eef2ff;
+}
+
+.stayRadio {
+    accent-color: #6366f1;
+}
+
+.stayHotel {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #0f172a;
+}
+
+.stayDates {
+    font-size: 0.76rem;
+    color: #64748b;
+    margin-top: 2px;
+}

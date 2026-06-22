@@ -1,0 +1,132 @@
+/* ── Audit Log ──────────────────────────────────────────────── */
+
+/* ── Table utility helpers ──────────────────────────────────── */
+.tableScroll  { overflow-x: auto; }
+.noWrap       { white-space: nowrap; }
+.idCell       { max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
+.summaryCell  { max-width: 260px; }
+.emptyCell    { text-align: center; padding: 32px; }
+
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--color-border);
+    background: transparent;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.tab:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.tabActive {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+/* ── Entity pill ────────────────────────────────────────────── */
+.entityPill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    white-space: nowrap;
+}
+
+/* ── Action badge ───────────────────────────────────────────── */
+.actionBadge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.actionCreate { background: #dcfce7; color: #16a34a; }
+.actionUpdate { background: #dbeafe; color: #2563eb; }
+.actionDelete { background: #fee2e2; color: #dc2626; }
+.actionStatus { background: #ede9fe; color: #7c3aed; }
+
+/* ── Diff button ────────────────────────────────────────────── */
+.diffBtn {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: all 150ms ease;
+}
+
+.diffBtn:hover {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+/* ── Diff row ───────────────────────────────────────────────── */
+.diffRow td {
+    background: var(--color-surface-2, #f8fafc);
+    padding: 12px 20px;
+}
+
+.diffGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .diffGrid { grid-template-columns: 1fr; }
+}
+
+.diffOld,
+.diffNew {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.diffLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 12px;
+    background: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+.diffOld .diffLabel { background: #fee2e2; color: #b91c1c; }
+.diffNew .diffLabel { background: #dcfce7; color: #15803d; }
+
+.diffPre {
+    margin: 0;
+    padding: 10px 12px;
+    font-family: monospace;
+    font-size: 0.78rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--color-text);
+    background: var(--color-surface);
+    min-height: 40px;
+}

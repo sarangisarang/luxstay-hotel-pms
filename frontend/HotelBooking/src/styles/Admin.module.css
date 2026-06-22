@@ -1,0 +1,118 @@
+/* ── Admin panel ────────────────────────────────────────────────── */
+.page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+}
+
+/* ── Page header ────────────────────────────────────────────────── */
+.pageHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.headerIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.pageTitle {
+    font-size: 1.625rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.pageSubtitle {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* ── Quick-links grid ───────────────────────────────────────────── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 40px;
+}
+
+.linkCard {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: inherit;
+}
+
+.linkCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.10);
+}
+
+.linkCardInner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.linkIconBox {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4f46e5;
+    flex-shrink: 0;
+}
+
+.linkLabel {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.linkDesc {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin: 2px 0 0;
+}
+
+.chevron {
+    flex-shrink: 0;
+    color: #cbd5e1;
+}
+
+/* ── Analytics section ──────────────────────────────────────────── */
+.analyticsSection {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 32px;
+}
+
+.analyticsTitle {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 1.05rem;
+    margin-bottom: 20px;
+    margin-top: 0;
+}

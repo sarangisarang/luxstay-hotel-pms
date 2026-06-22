@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reserva de habitación</title>
+    <link rel="stylesheet" href="booking.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('bookingBanner.jpg');
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+            min-height: 100vh;
+        }
+
+        form, table {
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 20px;
+            margin: 30px auto;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 850px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            color: #222;
+            font-size: 16px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            background-color: #fdfdfd;
+            color: #000;
+            font-size: 15px;
+        }
+
+        #totalPrice {
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.02);
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        thead {
+            background-color: #0077aa;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(240, 240, 240, 0.8);
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+<form id="bookingForm">
+    <h2>Crear reserva</h2>
+
+    <label for="guest">Invitado:</label>
+    <select id="guest" name="guest" required></select>
+
+    <label for="room">Habitación:</label>
+    <select id="room" name="room" required></select>
+
+    <label for="checkIn">Registrarse:</label>
+    <input type="date" id="checkIn" name="checkIn" required>
+
+    <label for="checkOut">Verificar:</label>
+    <input type="date" id="checkOut" name="checkOut" required>
+
+    <p id="totalPrice">Precio total: 0 €</p>
+
+    <button type="submit">Libro</button>
+</form>
+
+<h2 style="color:white;">Todas las reservas</h2>
+<table id="bookingTable">
+    <thead>
+    <tr>
+        <th>Invitado</th>
+        <th>Habitación</th>
+        <th>Registrarse</th>
+        <th>Verificar</th>
+        <th>Precio total</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script src="booking.js"></script>
+</body>
+</html>

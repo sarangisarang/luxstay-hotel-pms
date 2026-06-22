@@ -1,0 +1,159 @@
+/* ── Booking Confirmation Page ──────────────────────────────────── */
+
+.root {
+    min-height: 100vh;
+    background: #f0fdf4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+}
+
+.wrap { width: 100%; max-width: 560px; }
+
+/* ── Success header ─────────────────────────────────────────────── */
+.header { text-align: center; margin-bottom: 32px; }
+
+.iconCircle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg,#22c55e,#16a34a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(34,197,94,.35);
+}
+
+.h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #14532d;
+    letter-spacing: -.02em;
+    margin-bottom: 8px;
+}
+
+.sub { color: #166534; font-size: 1rem; margin: 0; }
+
+/* ── Booking card ───────────────────────────────────────────────── */
+.bookingCard {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(15,23,42,.10);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.banner {
+    background: linear-gradient(135deg,#4f46e5 0%,#7c3aed 55%,#9333ea 100%);
+    padding: 20px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.refLabel {
+    color: rgba(255,255,255,.7);
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin: 0;
+}
+
+.refCode {
+    color: white;
+    font-weight: 800;
+    font-size: 1.2rem;
+    font-family: monospace;
+    letter-spacing: .05em;
+    margin: 4px 0 0;
+}
+
+.confirmedBadge {
+    background: rgba(255,255,255,.18);
+    color: white;
+    font-size: .78rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.25);
+}
+
+.details { padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+
+.row { display: flex; justify-content: space-between; align-items: center; }
+
+.rowLabel {
+    font-size: .83rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rowValue {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: .9rem;
+    max-width: 300px;
+    text-align: right;
+}
+
+.dashedDivider { border-top: 1px dashed #e2e8f0; margin: 0 28px; }
+
+.totalRow { padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; }
+.totalLabel { font-weight: 700; color: #0f172a; }
+.totalValue { font-weight: 800; font-size: 1.4rem; color: #4f46e5; }
+
+/* ── What's next box ────────────────────────────────────────────── */
+.nextBox {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+}
+
+.nextTitle { font-weight: 700; color: #1e40af; font-size: .9rem; margin-bottom: 10px; margin-top: 0; }
+.nextList  { margin: 0; padding: 0 0 0 18px; color: #3730a3; font-size: .83rem; line-height: 2; }
+
+/* ── Action buttons ─────────────────────────────────────────────── */
+.actions { display: flex; gap: 12px; }
+
+.btnLink { flex: 1; text-decoration: none; }
+
+.btnOutline {
+    width: 100%;
+    padding: 13px;
+    background: white;
+    color: #4f46e5;
+    border: 1.5px solid #c7d2fe;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: .9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btnSolid {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg,#4f46e5,#7c3aed);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: .9rem;
+    box-shadow: 0 4px 16px rgba(79,70,229,.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
