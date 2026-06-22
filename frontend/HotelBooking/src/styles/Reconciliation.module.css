@@ -1,0 +1,121 @@
+/* ── Daily Reconciliation ───────────────────────────────────── */
+.tableScroll { overflow-x: auto; }
+.emptyCell   { text-align: center; padding: 32px; }
+.mb24        { margin-bottom: 24px; }
+
+
+.dateRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.dateLabel {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.dateInput {
+    padding: 8px 12px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    font-family: inherit;
+}
+
+/* ── KPI cards ──────────────────────────────────────────────── */
+.kpiRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpiCard {
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid transparent;
+}
+
+.kpiGreen { background: #f0fdf4; border-color: #bbf7d0; }
+.kpiAmber { background: #fffbeb; border-color: #fde68a; }
+.kpiBlue  { background: #eff6ff; border-color: #bfdbfe; }
+
+.kpiLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.kpiValue {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.kpiSub {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* ── Method breakdown ───────────────────────────────────────── */
+.methodGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px 20px;
+}
+
+.methodCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 100px;
+    padding: 14px 16px;
+    background: var(--color-surface-2, #f8fafc);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+}
+
+.methodIcon { font-size: 1.4rem; }
+
+.methodName {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.methodTotal {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+/* ── Method pill ────────────────────────────────────────────── */
+.methodPill {
+    font-size: 0.78rem;
+    padding: 2px 8px;
+    background: #ede9fe;
+    color: #6d28d9;
+    border-radius: 999px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ── Status badges ──────────────────────────────────────────── */
+.statusPaid    { color: #16a34a; font-weight: 700; }
+.statusPending { color: #d97706; font-weight: 700; }

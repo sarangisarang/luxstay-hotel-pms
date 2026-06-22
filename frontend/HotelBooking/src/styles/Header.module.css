@@ -1,0 +1,456 @@
+/* Header.module.css */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 1px 24px rgba(0, 0, 0, 0.06);
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 1.25rem;
+}
+
+/* ===== Brand ===== */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  user-select: none;
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  flex-shrink: 0;
+}
+
+.brandText {
+  display: none;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .brandText { display: flex; }
+}
+
+.brandName {
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+
+.brandSub {
+  font-size: 0.67rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ===== Book a Room CTA ===== */
+.bookBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+  transition: opacity 150ms ease, box-shadow 150ms ease;
+}
+
+.bookBtn:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 18px rgba(79, 70, 229, 0.45);
+}
+
+/* ===== Hamburger (mobile only) ===== */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 150ms ease;
+  flex-shrink: 0;
+}
+
+.hamburger:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+@media (max-width: 767px) {
+  .hamburger { display: flex; }
+  .bookBtn   { display: none; }
+}
+
+/* ===== Menu wrapper ===== */
+.menuWrapper {
+  position: relative;
+}
+
+/* ===== Right controls ===== */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ===== Bell button ===== */
+.bellBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.bellBtn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.bellDot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid white;
+}
+
+.bellBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ===== Menu button ===== */
+.menuBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 5px 10px 5px 5px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: transparent;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.menuBtn:hover,
+.menuBtnOpen {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* ===== Avatar ===== */
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+/* ===== User info (email + role pill) ===== */
+.userInfo {
+  display: none;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .userInfo { display: flex; }
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0f172a;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 0 2px;
+}
+
+.rolePill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: 1px solid;
+}
+
+.roleAdmin     { background: #ede9fe; color: #6d28d9; border-color: #ddd6fe; }
+.roleReception { background: #dbeafe; color: #1d4ed8; border-color: #bfdbfe; }
+.roleUser      { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+.roleDefault   { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+
+/* ===== Chevron ===== */
+.chevron {
+  color: #94a3b8;
+  transition: transform 200ms ease;
+}
+
+.chevronOpen { transform: rotate(180deg); }
+
+/* ===== Dropdown ===== */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  z-index: 100;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-decoration: none;
+  transition: background 130ms ease;
+  cursor: pointer;
+}
+
+.dropdownItem:hover { background: #f8fafc; }
+
+.dropdownIcon { color: #6366f1; display: flex; align-items: center; }
+
+.dropdownDivider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 4px 8px;
+}
+
+.logoutItem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ef4444;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 130ms ease;
+}
+
+.logoutItem:hover { background: #fef2f2; }
+
+/* ===== Bell open state ===== */
+.bellBtnOpen {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* ===== Notification wrapper (relative, for dropdown positioning) ===== */
+.notifWrapper {
+  position: relative;
+}
+
+/* ===== Notification panel ===== */
+.notifPanel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notifPanelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.notifPanelTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.markAllBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6366f1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: background 130ms ease;
+}
+
+.markAllBtn:hover { background: #eef2ff; }
+
+.notifList {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notifEmpty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.notifItem {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8fafc;
+  cursor: default;
+  transition: background 120ms ease;
+}
+
+.notifItem:hover { background: #f8fafc; }
+
+.notifUnread {
+  border-left: 3px solid #6366f1;
+  background: #fafbff;
+}
+
+.notifRead {
+  border-left: 3px solid transparent;
+}
+
+.notifItemTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.notifItemMsg {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.notifItemTime {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.notifViewAll {
+  display: block;
+  text-align: center;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6366f1;
+  text-decoration: none;
+  border-top: 1px solid #f1f5f9;
+  transition: background 130ms ease;
+}
+
+.notifViewAll:hover { background: #f5f3ff; }

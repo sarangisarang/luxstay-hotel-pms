@@ -1,0 +1,32 @@
+.react-calendar {
+    width: 100%;
+    max-width: 500px;
+    background: #f9fafb;
+    border: none;
+    font-family: Arial, sans-serif;
+    line-height: 1.125em;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    padding: 8px;
+}
+
+.react-calendar__tile--active {
+    background: #4f46e5 !important;
+    color: white !important;
+}
+
+.react-calendar__tile--now {
+    background: #fffae6 !important;
+}
+
+.bg-red-400 {
+    background-color: #f87171 !important;
+    color: white !important;
+}
+rc-cell { border-radius: 0.5rem; }
+.rc-booked {
+    background: #f87171 !important; color: #fff !important;
+}      /* red-400 */
+.rc-free   {
+    background: #f0fdf4 !important; color: #1f2937 !important;
+}   /* green-50 / gray-800 */

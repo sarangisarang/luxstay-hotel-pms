@@ -1,0 +1,174 @@
+/* ── Staff Schedule ─────────────────────────────────────────── */
+.formCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+.formActions {
+    display: flex;
+    align-items: flex-end;
+}
+
+/* ── Weekly grid ────────────────────────────────────────────── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    min-height: 420px;
+}
+
+@media (max-width: 1000px) {
+    .grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 640px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.dayCol {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 320px;
+}
+
+.today {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,.15);
+}
+
+.dayHeader {
+    padding: 10px 12px 8px;
+    background: var(--color-surface-2);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dayName {
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dayDate {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-left: auto;
+}
+
+.todayBadge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #6366f1;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 999px;
+}
+
+.dayBody {
+    padding: 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.empty {
+    font-size: 0.75rem;
+    color: var(--color-text-xs);
+    text-align: center;
+    padding: 20px 0;
+    opacity: 0.6;
+}
+
+/* ── Department border-left variants ───────────────────────── */
+.deptHousekeeping { border-left-color: #22c55e; }
+.deptReception    { border-left-color: #3b82f6; }
+.deptRestaurant   { border-left-color: #f59e0b; }
+.deptSecurity     { border-left-color: #8b5cf6; }
+.deptMaintenance  { border-left-color: #ef4444; }
+.deptManagement   { border-left-color: #0ea5e9; }
+.deptOther        { border-left-color: #94a3b8; }
+
+/* ── Department text color variants ─────────────────────────── */
+.deptTextHousekeeping { color: #22c55e; }
+.deptTextReception    { color: #3b82f6; }
+.deptTextRestaurant   { color: #f59e0b; }
+.deptTextSecurity     { color: #8b5cf6; }
+.deptTextMaintenance  { color: #ef4444; }
+.deptTextManagement   { color: #0ea5e9; }
+.deptTextOther        { color: #94a3b8; }
+
+/* ── Shift card ─────────────────────────────────────────────── */
+.shiftCard {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid #6366f1;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.shiftName {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--color-text);
+    margin-bottom: 2px;
+}
+
+.shiftTime {
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.shiftDept {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 3px;
+}
+
+.shiftActions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.statusSelect {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    flex: 1;
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 2px;
+    border-radius: 4px;
+}
+.deleteBtn:hover { color: #ef4444; }

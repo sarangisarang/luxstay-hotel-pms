@@ -1,0 +1,17 @@
+package com.booksys.inventory;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface InventoryItemRepository extends JpaRepository<InventoryItem, UUID> {
+
+    List<InventoryItem> findByActiveTrue();
+
+    List<InventoryItem> findByCategory(InventoryCategory category);
+
+    @Query("SELECT i FROM InventoryItem i WHERE i.active = true AND i.currentStock <= i.minStock")
+    List<InventoryItem> findLowStock();
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hotel Staff</title>
+    <link rel="stylesheet" href="staff.css">
+    <script src="staff.js" defer></script>
+</head>
+<body>
+
+<div class="container">
+    <h2>Add New Staff</h2>
+    <form id="staffForm">
+        <input type="text" id="firstName" placeholder="First Name" required>
+        <input type="text" id="lastName" placeholder="Last Name" required>
+        <input type="text" id="position" placeholder="Position" required>
+        <input type="number" id="salary" placeholder="Salary (€)" required>
+        <input type="date" id="dob" placeholder="Date of Birth" required>
+        <input type="text" id="phone" placeholder="Phone Number" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="date" id="hireDate" placeholder="Hire Date" required>
+        <input type="text" id="hotelId" placeholder="Hotel ID" required>
+        <button type="button" onclick="saveStaff()">Save</button>
+    </form>
+</div>
+
+<div class="table-section">
+    <h2>All Staff</h2>
+    <table id="staffTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Staff rows will appear here -->
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

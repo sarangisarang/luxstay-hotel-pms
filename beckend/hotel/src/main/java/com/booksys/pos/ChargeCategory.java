@@ -1,0 +1,2 @@
+package com.booksys.pos;
+public enum ChargeCategory { MINIBAR, RESTAURANT, SPA, LAUNDRY, PARKING, ROOM_SERVICE, TELEPHONE, INTERNET, EXCURSION, OTHER }

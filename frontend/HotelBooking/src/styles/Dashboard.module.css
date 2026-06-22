@@ -1,0 +1,197 @@
+/* Dashboard.module.css */
+
+/* ===== Page wrapper ===== */
+.page { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* ===== Page header ===== */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.pageSub {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.refreshBtn {
+  padding: 0.5rem 1.125rem;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 130ms ease, border-color 130ms ease;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.refreshBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== Error banner ===== */
+.errorBanner {
+  padding: 0.875rem 1.125rem;
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ===== Stat card ===== */
+.statCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09);
+  transform: translateY(-1px);
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--stat-accent, #0f172a);
+  line-height: 1.1;
+}
+
+.statSub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ===== Card container ===== */
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cardAction {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.375rem 0.875rem;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 130ms ease;
+}
+
+.cardAction:hover {
+  background: #f8fafc;
+}
+
+.cardBody { padding: 0; }
+
+/* ===== Table inside card ===== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table thead th {
+  padding: 0.625rem 1.25rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #f8fafc;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td { border-bottom: none; }
+
+.table tbody tr:hover { background: #fafcff; }
+
+/* ===== Status badge ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.badgeGreen  { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+.badgeAmber  { background: #fef9c3; color: #a16207; border-color: #fde68a; }
+.badgeSlate  { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+.badgeRed    { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+
+/* ===== Empty state ===== */
+.empty {
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+/* ===== Skeleton ===== */
+.skeletonGrid { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem 1.25rem; }
+.skeletonRow  { display: flex; gap: 0.75rem; }

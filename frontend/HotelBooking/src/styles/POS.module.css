@@ -1,0 +1,210 @@
+/* ── POS page ───────────────────────────────────────────────────── */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--color-text, #0f172a);
+}
+
+.subtitle {
+    color: var(--color-text-muted, #64748b);
+    font-size: 0.85rem;
+    margin: 4px 0 0;
+}
+
+.addBtn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+.addBtn:hover { background: #1d4ed8; }
+
+/* ── Stats grid ─────────────────────────────────────────────────── */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.statCard {
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 10px;
+    padding: 14px 18px;
+}
+
+.statValue     { font-size: 1.5rem; font-weight: 800; }
+.statValueBlue { color: #2563eb; }
+.statValueAmber { color: #d97706; }
+.statValueRed  { color: #dc2626; }
+.statValueGreen { color: #16a34a; }
+
+.statLabel {
+    font-size: 0.73rem;
+    color: var(--color-text-muted, #64748b);
+    margin-top: 2px;
+}
+
+/* ── Filters ────────────────────────────────────────────────────── */
+.filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.filterBtn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--color-border, #d1d5db);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--color-surface, #fff);
+    color: var(--color-text-muted, #475569);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.filterBtnActive {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+/* ── Table wrapper ──────────────────────────────────────────────── */
+.tableWrap {
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.tableEmpty {
+    text-align: center;
+    padding: 32px;
+    color: var(--color-text-muted, #94a3b8);
+}
+
+/* ── Status pills ───────────────────────────────────────────────── */
+.pill {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.pillPending    { background: #fef3c7; color: #92400e; }
+.pillBilled     { background: #dbeafe; color: #1e40af; }
+.pillPaid       { background: #dcfce7; color: #166534; }
+.pillVoided     { background: #f3f4f6; color: #6b7280; }
+
+/* ── Void button ────────────────────────────────────────────────── */
+.voidBtn {
+    padding: 4px 10px;
+    border: 1.5px solid #fca5a5;
+    border-radius: 6px;
+    background: var(--color-surface, #fff);
+    color: #dc2626;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* ── Add charge modal ───────────────────────────────────────────── */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: var(--color-surface, #fff);
+    border-radius: 16px;
+    padding: 28px;
+    width: 500px;
+    max-width: 92vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.modalTitle {
+    margin: 0 0 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text, #0f172a);
+}
+
+.formFields { display: flex; flex-direction: column; gap: 13px; }
+
+.fieldLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted, #374151);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.fieldInput {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--color-border, #d1d5db);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--color-text, #0f172a);
+    background: var(--color-surface, #fff);
+    box-sizing: border-box;
+}
+
+.fieldInput:focus { outline: none; border-color: #6366f1; }
+
+.modalActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.cancelBtn {
+    padding: 9px 20px;
+    border: 1.5px solid var(--color-border, #d1d5db);
+    border-radius: 8px;
+    background: var(--color-surface, #fff);
+    cursor: pointer;
+    color: var(--color-text, #374151);
+    font-size: 0.88rem;
+}
+
+.saveBtn {
+    padding: 9px 20px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: opacity 0.15s;
+}
+.saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }

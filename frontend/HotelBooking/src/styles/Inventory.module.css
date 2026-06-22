@@ -1,0 +1,135 @@
+/* ── Inventory Management ───────────────────────────────────── */
+
+/* ── Add-item form layout ───────────────────────────────────── */
+.addForm    { display: flex; flex-wrap: wrap; gap: 12px; padding: 20px; }
+.fgWide     { flex: 2 1 200px; }
+.fgMed      { flex: 1 1 140px; }
+.fgSm       { flex: 1 1 100px; }
+.fgXs       { flex: 1 1 80px; }
+.fgAuto     { flex: 0 0 auto; display: flex; align-items: flex-end; }
+
+/* ── Table utilities ────────────────────────────────────────── */
+.tableScroll { overflow-x: auto; }
+.emptyCell   { text-align: center; padding: 24px; }
+.mb24        { margin-bottom: 24px; }
+.mt24        { margin-top: 24px; }
+
+
+.kpiRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpiCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--kpi-accent, #6366f1);
+    border-radius: 14px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.kpiLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+}
+
+.kpiValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+/* ── Adjust form ─────────────────────────────────────────────── */
+.adjustModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+}
+
+.adjustCard {
+    background: var(--color-surface);
+    border-radius: 16px;
+    padding: 24px 28px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+}
+
+.adjustTitle {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin: 0 0 18px;
+}
+
+.formGroup {
+    margin-bottom: 14px;
+}
+
+.formLabel {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.formInput,
+.formSelect {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.adjustActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+/* ── Low-stock highlight ─────────────────────────────────────── */
+.lowStock {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.stockOk {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+/* ── Category pill ───────────────────────────────────────────── */
+.catPill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #ede9fe;
+    color: #6d28d9;
+    white-space: nowrap;
+}
+
+/* ── Direction badge ─────────────────────────────────────────── */
+.dirIn  { color: #16a34a; font-weight: 700; }
+.dirOut { color: #dc2626; font-weight: 700; }

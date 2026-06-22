@@ -1,0 +1,19 @@
+.wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@media (max-width: 767px) {
+    .wrapper {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+}

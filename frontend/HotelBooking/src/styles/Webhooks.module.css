@@ -1,0 +1,76 @@
+/* ── Webhook Manager ────────────────────────────────────────── */
+.mb24 { margin-bottom: 24px; }
+
+
+.formCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 760px) {
+    .formRow { grid-template-columns: 1fr; }
+}
+
+.eventGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.eventChip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--color-text);
+}
+
+.eventChip input { accent-color: #6366f1; }
+
+/* ── Event tags ─────────────────────────────────────────────── */
+.eventTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.eventTag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    background: #ede9fe;
+    color: #6d28d9;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* ── URL display ────────────────────────────────────────────── */
+.url {
+    font-size: 0.8rem;
+    font-family: monospace;
+    color: var(--color-text-muted);
+    word-break: break-all;
+    max-width: 260px;
+    display: block;
+}

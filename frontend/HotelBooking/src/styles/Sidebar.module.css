@@ -1,0 +1,590 @@
+/* Sidebar.module.css — ULTRA PRO (CSS Modules safe)
+   ✅ No :root/html/body in this file (pure selectors rule)
+   ✅ Compact mode + sticky top/bottom
+   ✅ No purple visited links
+*/
+
+.container {
+    /* ===== Scoped tokens ===== */
+    --sb-width: 240px;
+    --sb-width-compact: 76px;
+
+    --sb-bg-a: rgba(10, 10, 30, 0.82);
+    --sb-bg-b: rgba(15, 23, 42, 0.96);
+    --sb-border: rgba(255, 255, 255, 0.07);
+
+    --sb-text: rgba(255, 255, 255, 0.90);
+    --sb-muted: rgba(255, 255, 255, 0.45);
+
+    --sb-hover: rgba(99, 102, 241, 0.16);
+    --sb-press: rgba(99, 102, 241, 0.24);
+
+    --sb-accent-1: #6366f1;
+    --sb-accent-2: #8b5cf6;
+
+    --sb-shadow: 0 26px 70px rgba(0, 0, 0, 0.35);
+
+    position: fixed;
+    top: var(--header-height, 64px);
+    left: 0;
+    bottom: 0;
+    width: var(--sb-width);
+
+    padding: 10px 10px 0 10px;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+            radial-gradient(1200px 900px at 10% 0%, rgba(124, 58, 237, 0.18), transparent 55%),
+            linear-gradient(180deg, var(--sb-bg-a), var(--sb-bg-b));
+
+    border-right: 1px solid var(--sb-border);
+    box-shadow: var(--sb-shadow);
+
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+
+    overflow: hidden;
+    z-index: 40;
+
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans";
+}
+
+/* export class for TSX (used as styles.compact) */
+.compact {}
+
+.container.compact {
+    width: var(--sb-width-compact);
+}
+
+/* ===== Top bar ===== */
+.top {
+    flex-shrink: 0;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 8px 6px 10px 6px;
+
+    background: linear-gradient(180deg, rgba(2, 6, 23, 0.72), rgba(2, 6, 23, 0.18));
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0; /* allow text truncation */
+}
+
+.brandIcon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+
+    color: rgba(255,255,255,0.92);
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.10);
+}
+
+.brandText {
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.92);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rolePill {
+    margin-left: 6px;
+    padding: 4px 8px;
+    border-radius: 999px;
+
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    color: rgba(255,255,255,0.88);
+    background: rgba(124, 58, 237, 0.18);
+    border: 1px solid rgba(255,255,255,0.10);
+}
+
+.iconButton {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+
+    color: rgba(255,255,255,0.86);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
+
+    cursor: pointer;
+    transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.iconButton:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.16);
+    transform: translateY(-1px);
+}
+
+.iconButton:active {
+    transform: translateY(0px);
+}
+
+/* divider */
+.divider {
+    flex-shrink: 0;
+    height: 1px;
+    margin: 6px 6px 8px 6px;
+    background: rgba(255,255,255,0.10);
+}
+
+/* ===== Demo mode banner ===== */
+.demoBanner {
+    flex-shrink: 0;
+    margin: 0 12px 8px 12px;
+    padding: 6px 10px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #92400e;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* ===== Scroll area ===== */
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 6px 6px 10px 6px;
+
+    flex: 1;
+    min-height: 0;      /* required: flex children won't shrink below content size otherwise */
+    overflow-y: auto;
+}
+
+/* scrollbar */
+.list::-webkit-scrollbar { width: 10px; }
+.list::-webkit-scrollbar-track { background: transparent; }
+.list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.14);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+.list:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.22); }
+
+/* section label */
+.section {
+    margin: 14px 6px 8px;
+    padding: 8px 10px;
+
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-size: 0.70rem;
+    font-weight: 900;
+    color: var(--sb-muted);
+
+    border-left: 3px solid rgba(255,255,255,0.16);
+}
+
+/* Links never purple/underlined */
+.link,
+.link:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* item */
+.item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin: 3px 4px;
+    padding: 10px 12px;
+    border-radius: 14px;
+
+    color: var(--sb-text);
+    background: transparent;
+
+    font-size: 0.95rem;
+    font-weight: 650;
+
+    border: 1px solid transparent;
+
+    transition:
+            transform 180ms ease,
+            background-color 180ms ease,
+            border-color 180ms ease,
+            box-shadow 220ms ease;
+}
+
+.item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: radial-gradient(120% 100% at 0% 0%, rgba(255,255,255,0.14), transparent 60%);
+    opacity: 0;
+    transition: opacity 180ms ease;
+}
+
+.item:hover {
+    background: var(--sb-hover);
+    border-color: rgba(255,255,255,0.10);
+    transform: translateX(6px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+}
+.item:hover::before { opacity: 1; }
+
+.item:active {
+    background: var(--sb-press);
+    transform: translateX(4px);
+}
+
+/* focus (keyboard) */
+.link:focus-visible .item {
+    outline: 2px solid rgba(168, 85, 247, 0.55);
+    outline-offset: 2px;
+}
+
+/* active */
+.active {
+    background: linear-gradient(135deg, var(--sb-accent-1), var(--sb-accent-2));
+    border-color: rgba(255,255,255,0.14);
+    box-shadow:
+            0 14px 34px rgba(124, 58, 237, 0.32),
+            0 10px 26px rgba(0, 0, 0, 0.22);
+}
+
+.active::after {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 10%;
+    width: 4px;
+    height: 80%;
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.18));
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
+}
+
+/* icon pill */
+.icon {
+    display: grid;
+    place-items: center;
+
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+
+    color: rgba(255,255,255,0.86);
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.10);
+
+    transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.item:hover .icon {
+    transform: translateX(1px) scale(1.04);
+    background: rgba(255,255,255,0.14);
+}
+
+.active .icon {
+    background: rgba(0,0,0,0.18);
+}
+
+/* label (text) */
+.label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== Bottom bar ===== */
+.themeRow {
+    margin-bottom: 8px;
+}
+
+.bottom {
+    flex-shrink: 0;
+    z-index: 2;
+
+    padding: 10px 10px 12px 10px;
+
+    background: linear-gradient(0deg, rgba(2, 6, 23, 0.82), rgba(2, 6, 23, 0.10));
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.logoutBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 12px;
+    border-radius: 14px;
+
+    color: rgba(255,255,255,0.92);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
+
+    cursor: pointer;
+    transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.logoutBtn:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.24);
+    transform: translateY(-1px);
+}
+
+.logoutBtn:active { transform: translateY(0px); }
+
+/* ===== Group divider ===== */
+.groupDivider {
+    height: 1px;
+    margin: 8px 6px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===== Collapsible group header (button) ===== */
+.groupHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin: 2px 0;
+    padding: 9px 12px;
+    border-radius: 14px;
+
+    color: var(--sb-muted);
+    background: transparent;
+    border: 1px solid transparent;
+
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: left;
+
+    cursor: pointer;
+    transition:
+        color 180ms ease,
+        background-color 180ms ease,
+        border-color 180ms ease;
+}
+
+.groupHeader:hover {
+    color: var(--sb-text);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.groupHeaderActive {
+    color: rgba(167, 139, 250, 0.95);
+}
+
+/* group icon pill */
+.groupIcon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+
+    font-size: 0.80rem;
+    color: rgba(255, 255, 255, 0.70);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+
+    transition: background-color 180ms ease;
+}
+
+.groupHeader:hover .groupIcon {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.groupHeaderActive .groupIcon {
+    color: rgba(167, 139, 250, 0.95);
+    background: rgba(99, 102, 241, 0.20);
+    border-color: rgba(99, 102, 241, 0.30);
+}
+
+/* group label text */
+.groupLabel {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* chevron */
+.groupChevron {
+    flex-shrink: 0;
+    font-size: 0.70rem;
+    color: var(--sb-muted);
+    transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.groupChevronOpen {
+    transform: rotate(90deg);
+}
+
+/* ===== Collapsible items container (CSS grid animation) ===== */
+.groupItems {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 260ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.groupItemsOpen {
+    grid-template-rows: 1fr;
+}
+
+/* inner list needs min-height: 0 for grid animation to work */
+.groupItemsInner {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.groupItemRow {
+    /* no extra margin — item itself has margin */
+}
+
+/* indent group items slightly */
+.itemIndented {
+    margin-left: 8px;
+}
+
+/* ===== Compact mode rules ===== */
+.container.compact .brandText,
+.container.compact .rolePill,
+.container.compact .label,
+.container.compact .section {
+    display: none;
+}
+
+.container.compact .list {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.container.compact .item {
+    justify-content: center;
+    padding: 10px 10px;
+}
+
+.container.compact .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+}
+
+/* compact: hide group labels and chevrons */
+.container.compact .groupLabel,
+.container.compact .groupChevron {
+    display: none;
+}
+
+.container.compact .groupHeader {
+    justify-content: center;
+    padding: 9px 10px;
+}
+
+.container.compact .groupIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+}
+
+/* In compact mode, always show group items (no collapse) */
+.container.compact .groupItems {
+    grid-template-rows: 1fr;
+}
+
+.container.compact .itemIndented {
+    margin-left: 0;
+}
+
+/* reduce motion */
+@media (prefers-reduced-motion: reduce) {
+    .item, .icon, .iconButton, .logoutBtn, .groupHeader, .groupChevron, .groupItems { transition: none; }
+}
+
+/* ===== Mobile overlay backdrop ===== */
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 39;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+/* ===== Mobile: sidebar hidden by default, slides in ===== */
+@media (max-width: 767px) {
+    .container {
+        transform: translateX(-100%);
+        transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 50;
+    }
+
+    .container.mobileOpen {
+        transform: translateX(0);
+    }
+
+    .overlay {
+        display: block;
+    }
+}
+
+/* ===== Tablet: compact by default, sidebar always visible ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .container {
+        width: var(--sb-width-compact);
+    }
+
+    .container .brandText,
+    .container .rolePill,
+    .container .label,
+    .container .section {
+        display: none;
+    }
+
+    .container .item {
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .container .icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 12px;
+    }
+}

@@ -1,0 +1,54 @@
+/* Invoice print styles - regular CSS (not a module) */
+.invoice-print-area {
+    background: #fff;
+}
+
+@media screen {
+    .invoice-print-area table { border-collapse: collapse; }
+    .invoice-print-area th,
+    .invoice-print-area td { border: 1px solid #e5e7eb; }
+}
+
+@media print {
+    @page { size: A4; margin: 12mm; }
+
+    html, body {
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    body * { visibility: hidden !important; }
+
+    #invoice-print,
+    #invoice-print * { visibility: visible !important; }
+
+    #invoice-print {
+        position: relative !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    main {
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+    }
+
+    #invoice-print table,
+    #invoice-print thead,
+    #invoice-print tbody,
+    #invoice-print tr,
+    #invoice-print td,
+    #invoice-print th {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    #invoice-print .no-print { display: none !important; }
+}

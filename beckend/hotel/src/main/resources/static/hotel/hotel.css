@@ -1,0 +1,56 @@
+body {
+    background-image: url("hotelbanner.jpg");
+    background-size: cover;
+    background-position: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #f8f8f8;
+}
+
+.form-container {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 550px;
+    margin: 60px auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    color: #ffffff;
+}
+
+label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #f0f0f0;
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+input, select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    width: 100%;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+    color: #000;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

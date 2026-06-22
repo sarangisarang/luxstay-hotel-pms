@@ -1,0 +1,308 @@
+/* ── Guest self check-in portal ─────────────────────────────────── */
+.page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.heroHeader {
+    text-align: center;
+    margin-bottom: 32px;
+    color: #fff;
+}
+
+.heroIcon  { font-size: 3rem; }
+
+.heroTitle {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 12px 0 6px;
+}
+
+.heroSub {
+    font-size: 0.94rem;
+    opacity: 0.85;
+    margin: 0;
+}
+
+/* ── Main card ──────────────────────────────────────────────────── */
+.card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────── */
+.tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.tabBtn {
+    flex: 1;
+    padding: 9px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    background: transparent;
+    color: #64748b;
+}
+
+.tabBtnActive {
+    background: #fff;
+    color: #1e3a5f;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Form layout ────────────────────────────────────────────────── */
+.formFields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 540px) {
+    .row2 { grid-template-columns: 1fr; }
+}
+
+.fieldLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.fieldInput {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: #0f172a;
+    background: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.fieldInput:focus { outline: none; border-color: #2563eb; }
+
+.fieldTextarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ── Checkbox options grid ──────────────────────────────────────── */
+.optionsLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.optionsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.checkOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    background: #fff;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.checkOptionActive {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.checkOptionInput {
+    width: 16px;
+    height: 16px;
+    accent-color: #2563eb;
+    flex-shrink: 0;
+}
+
+/* ── Submit button ──────────────────────────────────────────────── */
+.submitBtn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 8px;
+    transition: opacity 0.15s;
+}
+.submitBtn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* ── Success state ──────────────────────────────────────────────── */
+.successState {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.successIcon { font-size: 3.5rem; }
+
+.successTitle {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 16px 0 8px;
+    color: #0f172a;
+}
+
+.successText {
+    color: #64748b;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+}
+
+.confirmationBox {
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    border-radius: 14px;
+    padding: 20px;
+    display: inline-block;
+}
+
+.confirmationLabel {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.confirmationCode {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #166534;
+    letter-spacing: 3px;
+}
+
+.successHint {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 20px;
+}
+
+.anotherBtn {
+    margin-top: 12px;
+    padding: 10px 24px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: #374151;
+}
+
+/* ── Status lookup ──────────────────────────────────────────────── */
+.statusRow {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.statusInput {
+    flex: 1;
+    padding: 11px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    box-sizing: border-box;
+    color: #0f172a;
+}
+
+.statusInput:focus { outline: none; border-color: #2563eb; }
+
+.checkBtn {
+    padding: 11px 22px;
+    background: #1e3a5f;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+}
+.checkBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.noResults {
+    text-align: center;
+    color: #94a3b8;
+    padding: 24px;
+    font-size: 0.88rem;
+}
+
+/* ── Status cards ───────────────────────────────────────────────── */
+.statusCard {
+    border: 2px solid;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.statusSubmitted { background: #fef3c7; border-color: #fde68a; }
+.statusReviewed  { background: #dbeafe; border-color: #bfdbfe; }
+.statusApproved  { background: #dcfce7; border-color: #86efac; }
+.statusRejected  { background: #fee2e2; border-color: #fca5a5; }
+
+.statusBookingId { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; }
+.statusCode { font-weight: 700; font-size: 1rem; letter-spacing: 2px; color: #0f172a; }
+.statusDate { font-size: 0.73rem; color: #94a3b8; margin-top: 4px; }
+
+.statusIconBlock { text-align: right; }
+.statusEmoji     { font-size: 1.75rem; }
+
+.statusLabelSubmitted { font-size: 0.73rem; font-weight: 700; color: #92400e; margin-top: 4px; }
+.statusLabelReviewed  { font-size: 0.73rem; font-weight: 700; color: #1e40af; margin-top: 4px; }
+.statusLabelApproved  { font-size: 0.73rem; font-weight: 700; color: #166534; margin-top: 4px; }
+.statusLabelRejected  { font-size: 0.73rem; font-weight: 700; color: #991b1b; margin-top: 4px; }
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.73rem;
+}

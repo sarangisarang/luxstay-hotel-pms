@@ -1,0 +1,296 @@
+/* ==============================================
+   Booking List — Clean Professional Theme (v2)
+   Neutral base, 3 accent statuses, calm payments
+   ============================================== */
+
+/* ---------- Variables ---------- */
+.scope{
+    --bg: #f6f7fb;
+    --card: #a46060;
+    --text: rgba(67, 80, 61, 0.9);        /* slate-900 */
+    --muted: #64748b;       /* slate-500 */
+    --border: #6893ea;      /* gray-200 */
+    --brand: #4f46e5;       /* indigo-600 */
+    --shadow: 0 8px 16px rgba(2,6,23,.05), 0 1px 4px rgba(2,6,23,.04);
+    --radius: 16px;
+
+    --money: #111827;       /* neutral numbers */
+
+    /* Status chips (light) */
+    --chip-emerald-bg: #96f7c9; --chip-emerald-fg:#065f46; /* confirmed/checked_in/paid */
+    --chip-amber-bg: #ebc89d;   --chip-amber-fg:#9a3412;   /* pending (only for STATUS) */
+    --chip-rose-bg: #e9c1c1;    --chip-rose-fg:#991b1b;    /* cancelled */
+    --chip-slate-bg: #aebdcc;   --chip-slate-fg:#334155;   /* neutral (completed/out/pending payment) */
+}
+
+/* ---------- Dark mode ---------- */
+@media (prefers-color-scheme: dark){
+    .scope{
+        --bg:#0b1020; --card: #958b95; --text: #6993e6; --muted:#94a3b8; --border:#1f2937;
+        --shadow: 0 10px 20px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.25);
+        --money: #85909f;
+
+        --chip-emerald-bg:#052e22; --chip-emerald-fg:#34d399;
+        --chip-amber-bg:#2b1f0a;   --chip-amber-fg:#fbbf24;
+        --chip-rose-bg:#2a0f12;    --chip-rose-fg:#f87171;
+        --chip-slate-bg:#111827;   --chip-slate-fg:#cbd5e1;
+    }
+}
+
+/* ---------- Page container ---------- */
+.container{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    color: var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: transparent;
+}
+.loading{ padding:32px; text-align:center; font-size:18px; color:var(--muted); }
+
+/* ---------- Header / Tabs ---------- */
+.header{
+    display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
+    margin-bottom:16px;
+}
+.title{ font-size:28px; font-weight:700; letter-spacing:-0.02em; }
+.tabs{ display:flex; gap:8px; }
+
+.tab{
+    border:1px solid var(--border);
+    background:#f8fafc;
+    color:#334155;
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:13px; font-weight:600;
+    transition:all .15s;
+}
+.tab:hover{ background:#f1f5f9; color:#1f2937; border-color:#e5e7eb; }
+.tab:focus-visible{ outline:2px solid #c7d2fe; outline-offset:2px; }
+.active{ background: var(--brand); color:#fff; border-color: transparent; }
+
+.totalPill{
+    background:#f1f5f9; border:1px solid var(--border); border-radius:999px;
+    padding:8px 12px; font-size:13px; color:#334155;
+}
+.totalPill strong{ color: var(--text); }
+
+/* ---------- Alerts ---------- */
+.error, .info{
+    padding:10px 12px; border-radius:12px; margin:10px 0 16px; font-weight:500; border:1px solid;
+}
+.error{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
+.info { background:#ecfdf5; color:#065f46; border-color:#bbf7d0; }
+
+/* ---------- Table wrapper ---------- */
+.tableWrap{
+    position: relative;
+    overflow: auto;
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* subtle scroll edges */
+.tableWrap::before,
+.tableWrap::after{
+    content:"";
+    position: sticky;
+    top:0; bottom:0;
+    width:16px; pointer-events:none; z-index:5;
+}
+.tableWrap::before{ left:0;  background: linear-gradient(90deg, rgba(0,0,0,0.06), transparent); }
+.tableWrap::after { right:0; background: linear-gradient(-90deg, rgba(0,0,0,0.06), transparent); }
+@media (prefers-color-scheme: dark){
+    .tableWrap::before{ background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent); }
+    .tableWrap::after { background: linear-gradient(-90deg, rgba(255,255,255,0.08), transparent); }
+}
+
+/* ---------- Table core ---------- */
+.table{ min-width:1100px; width:100%; border-spacing:0; }
+
+.thead{
+    position:sticky; top:0; z-index:10;
+    background: rgba(248,250,252,.85);
+    backdrop-filter: blur(6px);
+}
+.thead th{
+    text-align:left; font-size:12px; font-weight:700; color:#475569;
+    text-transform:uppercase;
+    padding:12px 16px; border-bottom:1px solid var(--border);
+}
+.actionsHead{ text-align:right }
+
+/* sortable heads */
+.sortHead { cursor: pointer; user-select: none; }
+.sortHead:hover { background: #f1f5f9; }
+
+/* sticky cols */
+.stickyFirst { position: sticky; left: 0; background: inherit; z-index: 2; }
+.stickyLast  { position: sticky; right: 0; background: inherit; z-index: 2; }
+.stickyFirst, .stickyLast { box-shadow: inset 0 0 0 1px var(--border); }
+
+
+/* ---------- Rows / Cells ---------- */
+.row:nth-child(odd){ background: #ffffff; }          /* თეთრი */
+.row:nth-child(even){ background: #f9fafb; }         /* ძალიან ღია slate */
+.row{ transition: background .15s; }
+.row:hover{ background: #eef2ff; }         /* calm hover */
+
+.table td{
+    padding:14px 16px; border-bottom:1px solid var(--border); vertical-align: top;
+}
+.muted{ color: var(--muted); }
+.mono{ font-variant-numeric: tabular-nums; }
+.bold{ font-weight:700; }
+
+.dense .table td { padding: 8px 12px; }
+.dense .chip { padding: 2px 6px; font-size: 10px; }
+.dense .menuBtn { padding: 4px 8px; }
+
+.dateDim{ color: color-mix(in oklab, var(--muted) 75%, var(--text) 25%); }
+
+/* ---------- Links (neutral) ---------- */
+.link{ color:#1f2937; text-decoration:none; font-weight:600; }
+.link:hover{ text-decoration:underline; }
+.link:focus-visible{ outline:2px solid #667dd9; outline-offset:2px; }
+.linkMuted{ color:#475569; text-decoration:none; }
+.linkMuted:hover{ text-decoration:underline; }
+
+/* ---------- Chips (status pills) ---------- */
+.chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 8px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.02em;
+}
+.is-default{ background: #7599e3; color:#374151; }
+
+/* STATUS — refined 4-tone system */
+
+/* Confirmed */
+.is-confirmed{
+    background:#dcfce7;   /* emerald-100 */
+    color:#166534;        /* emerald-800 */
+}
+
+/* Checked in */
+.is-checked_in{
+    background:#dbeafe;   /* blue-100 */
+    color:#1e3a8a;        /* blue-900 */
+}
+
+/* Cancelled */
+.is-cancelled{
+    background:#fee2e2;   /* rose-100 */
+    color:#991b1b;        /* rose-800 */
+}
+
+/* Checked out */
+.is-checked_out{
+    background:#f3f4f6;   /* neutral-100 */
+    color:#374151;        /* neutral-700 */
+}
+
+/* Completed */
+.is-completed{
+    background:#fef9c3;   /* amber-100 */
+    color:#92400e;        /* amber-800 */
+}
+/* STATUS pending (amber) – visible only in Status column */
+.statusCell .chip.is-pending{ background:var(--chip-amber-bg); color:var(--chip-amber-fg); }
+
+/* PAYMENT column refined */
+.paymentCell .chip.is-paid {
+    background: #28305e;   /* soft green */
+    color: #166534;        /* green-800 */
+}
+
+.paymentCell .chip.is-pending {
+    background: #3079c2;   /* slate-100 */
+    color: #334155;        /* slate-700 */
+}
+
+.paymentCell .chip.is-unpaid {
+    background: #df9797;   /* rose-100 */
+    color: #991b1b;        /* rose-800 */
+}
+
+/* Right aligned numeric cells */
+.right { text-align: right; }
+
+.totalAccent,
+.priceCell{
+    color: var(--money) !important;
+    font-weight: 800;
+    letter-spacing: .01em;
+    font-variant-numeric: tabular-nums;
+    opacity: 1 !important;
+    text-shadow: none;
+}
+.servicesCell { color: color-mix(in oklab, var(--muted) 35%, var(--text) 65%); }
+
+/* ---------- Actions menu ---------- */
+.actionsCell{ position:relative; overflow:visible; text-align:right; }
+.menu{ position:relative; display:inline-block; }
+.menuBtn{
+    all:unset; cursor:pointer; user-select:none;
+    border:1px solid var(--border); padding:6px 10px; border-radius:10px;
+    font-size:14px; line-height:1; background: #6fa2d6; color:#334155; transition:all .15s;
+    list-style:none;
+}
+.menuBtn:hover{ background: #1e3c5b; color:#1f2937; border-color: #1e3564; }
+.menuBtn:focus-visible{ outline:2px solid #c7d2fe; outline-offset:2px; }
+.menuBtn::-webkit-details-marker{ display:none; }
+.menu[open] .menuBtn{ background: #88bdf2; border-color: #7aa1ee; color:#1f2937; }
+
+.menuList{
+    position:absolute; right:0; top: calc(100% + 6px); z-index:30;
+    min-width: 260px;
+    max-width: min(360px, 90vw);
+    white-space: nowrap;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    padding: 6px;
+}
+.menuItem{ display:flex; align-items:center; gap:8px; white-space:nowrap; }
+
+@media (max-width: 480px){
+    .menuList{ min-width:220px; max-width: calc(100vw - 24px); }
+}
+
+/* ---------- Icons / small tweaks ---------- */
+.icon { display:inline-block; margin-right:6px; line-height:1; vertical-align:-1px; }
+.cell { display:inline-flex; align-items:center; gap:6px; }
+.chip .icon { margin-right:6px; }
+
+/* PAYMENT column refined */
+.paymentCell .chip.is-paid {
+    background: #6eaa82;   /* soft green */
+    color: #166534;        /* green-800 */
+}
+
+.paymentCell .chip.is-pending {
+    background: #8099b2;   /* slate-100 */
+    color: #334155;        /* slate-700 */
+}
+
+.paymentCell .chip.is-unpaid {
+    background: #cb8787;   /* rose-100 */
+    color: #991b1b;        /* rose-800 */
+}
+/* --------- Date columns (Check-in / Check-out) --------- */
+.table td:nth-child(3),
+.table td:nth-child(4) {
+    color: #000000 !important;   /* მკვეთრი შავი */
+    font-weight: 400;            /* ოდნავ სქელი ტექსტი */
+}
+/* --------- Total Price column --------- */
+.table td:last-child,
+.priceCell,
+.totalAccent {
+    color: #000000 !important;  /* მკვეთრი შავი */
+    font-weight: 500;           /* სქელი */
+}

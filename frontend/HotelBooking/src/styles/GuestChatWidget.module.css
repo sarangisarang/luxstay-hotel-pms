@@ -1,0 +1,344 @@
+/* Floating toggle button */
+.toggleBtn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: 2px solid rgba(212, 175, 55, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: transform 0.2s;
+}
+
+.toggleBtn:hover {
+  transform: scale(1.1);
+}
+
+.unreadBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e53e3e;
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* Chat window */
+.window {
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  z-index: 9998;
+  width: 360px;
+  max-height: 520px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: #0d1117;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.botName {
+  color: #d4af37;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.botStatus {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.onlineDot {
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+/* Messages area */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msgRow {
+  display: flex;
+}
+
+.msgRowUser {
+  justify-content: flex-end;
+}
+
+.msgRowAssistant {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.bubbleUser {
+  border-radius: 16px 16px 4px 16px;
+  background: linear-gradient(135deg, #0f3460, #1a1a2e);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #e2e8f0;
+}
+
+.bubbleAssistant {
+  border-radius: 16px 16px 16px 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e0;
+}
+
+.typing {
+  padding: 10px 14px;
+  border-radius: 16px 16px 16px 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Quick replies */
+.quickReplies {
+  padding: 6px 14px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.quickBtn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.08);
+  color: #d4af37;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.quickBtn:hover {
+  background: rgba(212, 175, 55, 0.18);
+}
+
+/* Input row */
+.inputRow {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.textInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  font-size: 13px;
+  outline: none;
+}
+
+.textInput::placeholder {
+  color: #4b5563;
+}
+
+.sendBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.sendBtnActive {
+  background: linear-gradient(135deg, #d4af37, #b8960c);
+  color: #0d1117;
+}
+
+.sendBtnDisabled {
+  background: rgba(255, 255, 255, 0.06);
+  color: #4b5563;
+  cursor: default;
+}
+
+/* Staff button in header */
+.staffBtn {
+  margin-left: auto;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 20px;
+  color: #d4af37;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.staffBtn:hover { background: rgba(212, 175, 55, 0.22); }
+
+/* System message */
+.msgRowSystem { justify-content: center; }
+.bubbleSystem {
+  border-radius: 10px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: #86efac;
+  font-size: 12px;
+  padding: 8px 14px;
+  text-align: center;
+  max-width: 90%;
+}
+
+/* Disclaimer */
+.disclaimer {
+  font-size: 10px;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 4px;
+  padding: 0 4px;
+  max-width: 80%;
+}
+
+/* Typing animation */
+.typing {
+  padding: 12px 16px;
+  border-radius: 16px 16px 16px 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b7280;
+  animation: bounce 1.2s infinite;
+  display: inline-block;
+  will-change: transform;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-5px); }
+}
+
+/* Human handoff panel */
+.handoffPanel {
+  padding: 14px;
+  background: rgba(212, 175, 55, 0.06);
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.handoffTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #d4af37;
+}
+.handoffInput {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.handoffInput::placeholder { color: #4b5563; }
+.handoffActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+.handoffCancel {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.handoffSubmit {
+  background: linear-gradient(135deg, #d4af37, #b8960c);
+  border: none;
+  border-radius: 6px;
+  color: #0d1117;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.handoffSubmit:disabled { opacity: 0.5; cursor: default; }

@@ -1,0 +1,185 @@
+/* ── Maintenance page ──────────────────────────────────────────── */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text, #0f172a);
+    margin: 0;
+}
+
+.addBtn {
+    background: #dc2626;
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.88rem;
+    transition: background 0.15s;
+}
+.addBtn:hover { background: #b91c1c; }
+
+/* ── Filter tabs ───────────────────────────────────────────────── */
+.filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filterBtn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.82rem;
+    background: var(--color-surface-2, #f1f5f9);
+    color: var(--color-text-muted, #374151);
+    transition: background 0.15s, color 0.15s;
+}
+.filterBtnActive {
+    background: #1e40af;
+    color: #fff;
+}
+
+/* ── Issue cards ───────────────────────────────────────────────── */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card {
+    background: var(--color-surface, #fff);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm, 0 1px 6px rgba(0,0,0,0.08));
+    border: 1px solid var(--color-border, #e2e8f0);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.cardBody { flex: 1; min-width: 0; }
+
+.cardTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.cardTitle {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-text, #0f172a);
+}
+
+/* ── Pill badges ───────────────────────────────────────────────── */
+.pill {
+    font-size: 0.72rem;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.pilLow      { background: #94a3b8; }
+.pillMedium  { background: #f59e0b; }
+.pillHigh    { background: #ef4444; }
+.pillCritical { background: #7c3aed; }
+
+.pillOpen       { background: #ef4444; }
+.pillInProgress { background: #f59e0b; }
+.pillOnHold     { background: #8b5cf6; }
+.pillResolved   { background: #22c55e; }
+.pillClosed     { background: #6b7280; }
+
+.pillCategory {
+    font-size: 0.72rem;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-weight: 600;
+    background: var(--color-surface-2, #f1f5f9);
+    color: var(--color-text-muted, #64748b);
+}
+
+.cardDesc {
+    font-size: 0.84rem;
+    color: var(--color-text-muted, #475569);
+    margin-bottom: 6px;
+}
+
+.cardMeta {
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #94a3b8);
+}
+
+.resolution {
+    font-size: 0.75rem;
+    color: #16a34a;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* ── Actions column ────────────────────────────────────────────── */
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 130px;
+}
+
+.actionBtn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    transition: opacity 0.15s;
+}
+.actionBtn:hover { opacity: 0.85; }
+
+.btnStart    { background: #f59e0b; color: #fff; }
+.btnResolve  { background: #22c55e; color: #fff; }
+.btnClose    { background: #6b7280; color: #fff; }
+.btnDelete   { background: #fee2e2; color: #dc2626; }
+.btnAssign   { background: #3b82f6; color: #fff; border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; border: none; cursor: pointer; }
+
+.assignRow {
+    display: flex;
+    gap: 4px;
+}
+
+.assignInput {
+    flex: 1;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border: 1.5px solid var(--color-border, #cbd5e1);
+    border-radius: 6px;
+    color: var(--color-text, #0f172a);
+    background: var(--color-surface, #fff);
+    min-width: 0;
+}
+
+/* ── Empty state ───────────────────────────────────────────────── */
+.empty {
+    text-align: center;
+    padding: 48px;
+    color: var(--color-text-muted, #94a3b8);
+    font-size: 0.9rem;
+}
