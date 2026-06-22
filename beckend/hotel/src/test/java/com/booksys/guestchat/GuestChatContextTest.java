@@ -43,9 +43,8 @@ class GuestChatContextTest {
 
     @BeforeEach
     void setup() {
-        // Leave geminiApiKey and claudeApiKey blank → forces rule-based fallback (no real HTTP calls)
-        ReflectionTestUtils.setField(controller, "geminiApiKey", "");
-        ReflectionTestUtils.setField(controller, "claudeApiKey", "");
+        // Leave groqApiKey blank → forces rule-based fallback (no real HTTP calls)
+        ReflectionTestUtils.setField(controller, "groqApiKey", "");
     }
 
     // =========================================================================
