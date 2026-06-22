@@ -50,7 +50,7 @@ jobs:
           DB_URL: jdbc:postgresql://localhost:5432/booking_test
           DB_USER: booking_user
           DB_PASS: test1234
-          JWT_SECRET: ci-test-secret-not-used-in-prod
+          JWT_SECRET: dGhpcy1pcy1hLXZlcnktbG9uZy1kZXYtc2VjcmV0LWtleQ==
           STRIPE_SECRET_KEY: sk_test_CIONLY
           STRIPE_PUBLISHABLE_KEY: pk_test_CIONLY
           MAIL_USER: ""
