@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "MultiEdit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Bash(echo 'export GROQ_API_KEY=\"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\"')",
+      "Bash(sed -i 's|export GROQ_API_KEY=.*|export GROQ_API_KEY=\"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\"|' /home/python/.bashrc)"
+    ],
+    "defaultMode": "bypassPermissions"
+  }
+}
