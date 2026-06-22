@@ -16,14 +16,16 @@ export default function RegisterPage() {
   const [email,           setEmail]           = useState("");
   const [password,        setPassword]        = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role,            setRole]            = useState("USER");
   const [firstName,       setFirstName]       = useState("");
   const [lastName,        setLastName]        = useState("");
   const [phone,           setPhone]           = useState("");
   const [address,         setAddress]         = useState("");
   const [dateOfBirth,     setDateOfBirth]     = useState("");
-  const [hotelId,         setHotelId]         = useState("");
   const [loading,         setLoading]         = useState(false);
+
+  // Public self-registration always creates a regular USER (guest) account.
+  // Staff/admin accounts are provisioned by an administrator, never self-served.
+  const role = "USER";
   const [error,           setError]           = useState("");
 
   async function handleRegister(e: React.FormEvent) {
@@ -40,7 +42,7 @@ export default function RegisterPage() {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role, firstName, lastName, phone, address, dateOfBirth, ...(role === "RECEPTION" && hotelId ? { hotelId } : {}) }),
+        body: JSON.stringify({ email, password, role, firstName, lastName, phone, address, dateOfBirth }),
       });
 
       const raw  = await res.text();
@@ -183,24 +185,6 @@ export default function RegisterPage() {
                   placeholder="••••••••" autoComplete="new-password" onChange={e => setConfirmPassword(e.target.value)} />
               </div>
             </div>
-
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-role">Role</label>
-              <select id="reg-role" className={styles.input} value={role} onChange={e => { setRole(e.target.value); setHotelId(""); }}>
-                <option value="USER">USER</option>
-                <option value="RECEPTION">RECEPTION</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
-            </div>
-
-            {role === "RECEPTION" && (
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="reg-hotel">Hotel ID <span className={styles.required}>*</span></label>
-                <input id="reg-hotel" className={styles.input} type="text" required value={hotelId}
-                  placeholder="e.g. a3f2c1d0-..." onChange={e => setHotelId(e.target.value)} />
-                <span className={styles.fieldHint}>Find the Hotel ID in Admin → Hotels</span>
-              </div>
-            )}
 
             <button type="submit" disabled={loading} className={styles.submitBtn}>
               {loading ? "Creating account…" : "Create account"}

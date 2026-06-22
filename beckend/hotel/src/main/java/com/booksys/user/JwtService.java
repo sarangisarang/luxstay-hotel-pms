@@ -29,24 +29,16 @@ public class JwtService {
 
     @PostConstruct
     public void validateSecret() {
-        if (secretFromProps == null || secretFromProps.isBlank()) {
-            throw new IllegalStateException("JWT_SECRET env var is required and must not be empty.");
-        }
-        byte[] decoded;
-        try {
-            decoded = Decoders.BASE64.decode(secretFromProps);
-        } catch (IllegalArgumentException e) {
-            decoded = secretFromProps.getBytes(StandardCharsets.UTF_8);
-        }
-        if (decoded.length < 32) {
-            throw new IllegalStateException("JWT_SECRET must be at least 32 bytes for HS256.");
-        }
+        JwtSecretValidator.validate(secretFromProps);
     }
 
     private SecretKey getSigningKey() {
+        // RuntimeException (not just IllegalArgumentException): jjwt throws
+        // DecodingException on non-base64 secrets — fall back to raw UTF-8 bytes
+        // so a valid plain-text secret signs the same way the validator accepts it.
         try {
             return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretFromProps));
-        } catch (IllegalArgumentException ignored) {
+        } catch (RuntimeException ignored) {
             return Keys.hmacShaKeyFor(secretFromProps.getBytes(StandardCharsets.UTF_8));
         }
     }
