@@ -136,7 +136,8 @@ group reservations, corporate accounts, guest profiles with preferences and comm
 
 **Revenue** — rate plans, dynamic pricing (weekend and peak-season uplifts applied at booking
 time), vouchers, POS room charges, invoices as generated PDFs, Stripe payment intents with a
-webhook endpoint.
+webhook endpoint. No cardholder data is stored: only the last four digits of a card are kept, and
+the expiry date and CVV are never accepted by the API at all.
 
 **Operations** — housekeeping tasks by type and priority, maintenance requests by category,
 inventory, employee and staff records, service requests, concierge requests across 15 request
@@ -168,11 +169,7 @@ endpoint and role permission.
 
 ## Known gaps
 
-- **The legacy payment path stores card data.** `Payment` persists `cardNumber`, `expiry` and
-  `cvv` as plain columns. The Stripe integration alongside it is the correct path — payment
-  intents, no card data touching this system. Removing those three columns and routing everything
-  through Stripe is the next piece of work, and there is no reason to keep them.
-- **Test coverage is thin for the size** — 60 tests against 292 endpoints. The booking overlap
+- **Test coverage is thin for the size** — 66 tests against 292 endpoints. The booking overlap
   logic, the ownership guard and the registration role rules are the parts that most deserve them.
 - **The backend directory is spelled `beckend/`.** Cosmetic, and a rename touches every path in
   the build.
