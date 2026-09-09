@@ -10,8 +10,8 @@ public record DirectBookingRequest(
         String    firstName,
         String    lastName,
         String    email,
-        String    phone,
-        String    cardNumber,
-        String    cardExpiry,
-        String    cardCvv
+        String    phone
 ) {}
+// Card fields used to be accepted here and were never read. Unused card data
+// still crosses the network and lands in request logs, so it is not accepted
+// at all; the demo booking path records a payment without card details.
