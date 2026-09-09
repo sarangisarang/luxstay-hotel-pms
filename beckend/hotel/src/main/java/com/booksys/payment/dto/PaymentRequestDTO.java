@@ -14,8 +14,11 @@ public class PaymentRequestDTO {
     private String paymentMethod;
     private LocalDate paymentDate;
     private String status;
+    /**
+     * Full card number as typed in the demo form. Only its last four digits are
+     * kept; the rest is discarded in the mapper and never persisted. Expiry and
+     * CVV are not accepted at all.
+     */
     private String cardNumber;
-    private String expiry;
-    private String cvv;
 }
 
