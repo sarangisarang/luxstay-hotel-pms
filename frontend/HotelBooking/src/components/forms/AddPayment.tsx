@@ -89,9 +89,9 @@ export default function AddPayment() {
         paymentMethod,
         paymentDate,
         status,
+        // Only the card number is sent, and only its last four digits are kept
+        // server-side. The expiry and CVV never leave the browser.
         cardNumber: needsCardDetails ? cardNumber : undefined,
-        expiry:     needsCardDetails ? expiry     : undefined,
-        cvv:        needsCardDetails ? cvv        : undefined,
       });
       setSuccess(true);
       setTimeout(() => router.push("/payments"), 1400);

@@ -18,9 +18,15 @@ public class Payment {
     @GeneratedValue
     private UUID id;
 
-    private String cardNumber;
-    private String expiry;
-    private String cvv;
+    /**
+     * Last four digits of the card, for reconciling a payment with a receipt.
+     * The full number, the expiry date and the CVV are never stored: the CVV in
+     * particular must not be retained after authorisation, and a stored PAN is a
+     * liability this system has no reason to carry. Real charges go through
+     * Stripe, which holds the card on its side.
+     */
+    @Column(length = 4)
+    private String cardLast4;
     private UUID guestId;
     private String guestName;
     private String guestEmail;

@@ -9,6 +9,16 @@ import com.booksys.payment.dto.PaymentResponseDTO;
  */
 public class PaymentMapper {
 
+    /**
+     * Keeps only the last four digits of a card number. Everything else is
+     * dropped here, at the boundary, so no other layer ever sees a full PAN.
+     */
+    static String lastFour(String cardNumber) {
+        if (cardNumber == null) return null;
+        String digits = cardNumber.replaceAll("\\D", "");
+        return digits.length() < 4 ? null : digits.substring(digits.length() - 4);
+    }
+
     public static PaymentResponseDTO toDTO(Payment payment) {
         PaymentResponseDTO dto = new PaymentResponseDTO();
         dto.setId(payment.getId());
@@ -17,9 +27,7 @@ public class PaymentMapper {
         dto.setBookingId(payment.getBooking().getId());
         dto.setPaymentDate(payment.getPaymentDate().toLocalDate());
         dto.setStatus(String.valueOf(payment.getStatus()));
-        dto.setCardNumber(payment.getCardNumber());
-        dto.setCvv(payment.getCvv());
-        dto.setExpiry(payment.getExpiry());
+        dto.setCardLast4(payment.getCardLast4());
         dto.setGuestName(payment.getBooking().getGuest().getFirstName() + " " + payment.getBooking().getGuest().getLastName());
         dto.setGuestId(payment.getBooking().getGuest().getId());
         dto.setGuestEmail(payment.getBooking().getGuest().getEmail());
@@ -34,9 +42,7 @@ public class PaymentMapper {
         payment.setPaymentMethod(dto.getPaymentMethod());
         payment.setPaymentDate(dto.getPaymentDate().atStartOfDay());
         payment.setStatus(PaymentStatus.valueOf(dto.getStatus()));
-        payment.setCardNumber(dto.getCardNumber());
-        payment.setCvv(dto.getCvv());
-        payment.setExpiry(dto.getExpiry());
+        payment.setCardLast4(lastFour(dto.getCardNumber()));
         return payment;
     }
 }

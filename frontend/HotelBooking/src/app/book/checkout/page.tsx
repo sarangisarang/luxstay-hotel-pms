@@ -102,7 +102,9 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           roomId: summary.roomId, checkIn: summary.checkIn, checkOut: summary.checkOut,
           firstName: guest.firstName, lastName: guest.lastName, email: guest.email, phone: guest.phone,
-          cardNumber: card.number.replace(/\s/g, ""), cardExpiry: card.expiry, cardCvv: card.cvv,
+          // Card details are collected to make the demo checkout feel real, but they
+          // are not sent: the backend never stored them and unused card data on the
+          // wire still ends up in request logs and proxies.
           serviceIds: selectedServices,
         }),
       });
