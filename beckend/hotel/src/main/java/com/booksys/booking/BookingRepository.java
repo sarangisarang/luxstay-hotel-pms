@@ -100,6 +100,18 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     @Query("select b from Booking b where b.guest.email = :email order by b.checkInDate desc")
     List<Booking> findByGuestEmail(@Param("email") String email);
 
+    /** Bookings of an e-mail address in any spelling (manage-booking link). */
+    @Query("select b from Booking b where b.guest is not null and lower(b.guest.email) = lower(:email) " +
+           "order by b.checkInDate desc")
+    List<Booking> findByGuestEmailIgnoreCase(@Param("email") String email);
+
+    /** Bookings of one guest profile, newest stay first. */
+    List<Booking> findByGuestIdOrderByCheckInDateDesc(UUID guestId);
+
+    /** True when the booking belongs to the guest profile of the given account. */
+    @Query("select count(b) > 0 from Booking b where b.id = :bookingId and b.guest.appUser.email = :accountEmail")
+    boolean isOwnedByAccount(@Param("bookingId") UUID bookingId, @Param("accountEmail") String accountEmail);
+
     /** All bookings whose scheduled check-out date is before today and are still CONFIRMED/CHECKED_IN. */
     @Query("select b from Booking b where b.checkOutDate < :today " +
            "and b.bookingStatus in (com.booksys.booking.BookingStatus.CONFIRMED, " +

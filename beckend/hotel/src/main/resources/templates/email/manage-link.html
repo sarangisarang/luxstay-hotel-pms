@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage your booking</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background:#f1f5f9; color:#1e293b; }
+    .wrapper { max-width:600px; margin:32px auto; background:white;
+               border-radius:16px; overflow:hidden;
+               box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .hero { background:linear-gradient(135deg,#4f46e5,#7c3aed);
+            padding:32px 40px; text-align:center; }
+    .hero h1 { color:white; font-size:1.5rem; font-weight:800; }
+    .body { padding:32px 40px; font-size:0.95rem; line-height:1.6; }
+    .btn { display:inline-block; margin:24px 0; padding:14px 28px; border-radius:10px;
+           background:#4f46e5; color:white !important; text-decoration:none; font-weight:700; }
+    .small { font-size:0.8rem; color:#64748b; word-break:break-all; }
+    .footer { text-align:center; padding:20px 40px 28px; background:#f8fafc;
+              border-top:1px solid #e2e8f0; font-size:0.8rem; color:#94a3b8; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="hero"><h1>Manage your booking</h1></div>
+  <div class="body">
+    <p>You asked for a link to view or cancel your bookings
+       (<span th:text="${count}">1</span> found for this e-mail address).</p>
+    <a class="btn" th:href="${link}" href="#">View my bookings</a>
+    <p class="small">The link is valid for 24 hours and only works for this e-mail address.
+       If you did not ask for it, you can ignore this e-mail — nothing changes.</p>
+    <p class="small" th:text="${link}">https://example.com/book/manage?token=...</p>
+  </div>
+  <div class="footer">This is an automated message.</div>
+</div>
+</body>
+</html>

@@ -10,14 +10,23 @@ import java.util.stream.Stream;
 public class ChatRestController {
 
     private final ChatMessageRepository repo;
+    private final com.booksys.booking.GuestBookingService guestBookingService;
 
-    public ChatRestController(ChatMessageRepository repo) {
+    public ChatRestController(ChatMessageRepository repo, com.booksys.booking.GuestBookingService guestBookingService) {
         this.repo = repo;
+        this.guestBookingService = guestBookingService;
     }
 
-    /** Fetch ordered history for a booking/conversation chat room. */
+    /**
+     * Ordered history of a booking/conversation chat room: staff for any room,
+     * a guest account only for its own bookings (404 otherwise, so booking IDs
+     * cannot be probed).
+     */
     @GetMapping("/{bookingId}/messages")
-    public List<ChatMessage> list(@PathVariable UUID bookingId) {
+    public List<ChatMessage> list(@PathVariable UUID bookingId, Authentication auth) {
+        if (!guestBookingService.canAccess(auth, bookingId)) {
+            throw new jakarta.persistence.EntityNotFoundException("Conversation not found");
+        }
         return repo.findByBookingIdOrderBySentAtAsc(bookingId);
     }
 

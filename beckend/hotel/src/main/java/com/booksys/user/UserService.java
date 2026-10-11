@@ -29,8 +29,8 @@ public class UserService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        return lookup(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     /**
@@ -42,7 +42,18 @@ public class UserService implements UserDetailsService {
      * @throws UsernameNotFoundException if no user exists with the given email
      */
     public AppUser findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        return lookup(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    /**
+     * Exact match first, then case-insensitive: "Anna@Example.org" and
+     * "anna@example.org" are the same mailbox.
+     */
+    private java.util.Optional<AppUser> lookup(String email) {
+        if (email == null) return java.util.Optional.empty();
+        String trimmed = email.trim();
+        return userRepository.findByEmail(trimmed)
+                .or(() -> userRepository.findFirstByEmailIgnoreCaseOrderByEmailAsc(trimmed));
     }
 }

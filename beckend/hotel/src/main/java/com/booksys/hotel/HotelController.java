@@ -87,8 +87,8 @@ public class HotelController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("hotelId") UUID hotelId
     ) {
+        Hotel hotel = hotelService.getById(hotelId);   // 404 before anything is stored
         String imageName = imageService.save(file, hotelId);
-        Hotel hotel = hotelService.getById(hotelId);
         hotel.setImageName(imageName);
         hotelService.saveHotelEntity(hotel);
         return ResponseEntity.ok(Map.of("imageName", imageName));

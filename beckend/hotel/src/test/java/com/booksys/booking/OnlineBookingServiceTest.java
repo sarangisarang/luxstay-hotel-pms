@@ -77,7 +77,9 @@ class OnlineBookingServiceTest {
         return new OnlineBookingService(bookingRepository, roomRepository, guestRepository, paymentRepository,
                 voucherRepository, quoteService, voucherService, paymentSync, stripeService, emailService,
                 notificationService,
-                new OnlineBookingSettings(payAtHotel, 30, 550, 3, stripe, 30, "pk_test_123"));
+                new OnlineBookingSettings(payAtHotel, 30, 550, 3, stripe, 30, "pk_test_123"),
+                new BookingManageTokens("test-secret-test-secret-test-secret-123"),
+                new com.booksys.user.CurrentUser(null, guestRepository));
     }
 
     @BeforeEach
@@ -100,7 +102,7 @@ class OnlineBookingServiceTest {
                 room.getId(), UUID.randomUUID(), inv.getArgument(1), inv.getArgument(2), 2, List.of(),
                 new BigDecimal("200.00"), List.of(), BigDecimal.ZERO.setScale(2), null, null,
                 BigDecimal.ZERO.setScale(2), new BigDecimal("200.00"), "EUR"));
-        lenient().when(guestRepository.findFirstByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
+        lenient().when(guestRepository.findFirstByEmailIgnoreCaseAndAppUserIsNull(anyString())).thenReturn(Optional.empty());
         lenient().when(guestRepository.save(any(Guest.class))).thenAnswer(inv -> {
             Guest g = inv.getArgument(0);
             g.setId(UUID.randomUUID());

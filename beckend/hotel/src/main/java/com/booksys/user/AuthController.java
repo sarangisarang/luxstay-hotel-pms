@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
+@lombok.extern.slf4j.Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -24,10 +25,13 @@ public class AuthController {
         try {
             return ResponseEntity.ok(authService.register(request));
         } catch (IllegalArgumentException | jakarta.persistence.EntityNotFoundException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage(), "error", e.getMessage()));
         } catch (Exception e) {
+            // Internal details (SQL, stack traces) are logged, never sent to the client
+            log.error("Registration failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Registration failed: " + e.getMessage()));
+                    .body(Map.of("message", "Registration failed. Please try again later.",
+                                 "error", "Registration failed. Please try again later."));
         }
     }
 
@@ -42,6 +46,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             // Generic fallback for unexpected exceptions
+            log.error("Token refresh failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Something went wrong"));
         }

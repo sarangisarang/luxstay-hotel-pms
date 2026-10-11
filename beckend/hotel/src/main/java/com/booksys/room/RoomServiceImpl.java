@@ -16,9 +16,8 @@ import java.util.stream.Collectors;
  * <p>Handles all room lifecycle operations: creation (with duplicate room-number guard),
  * retrieval, status-aware availability listing, partial updates, and deletion.</p>
  *
- * <p>Note: the static {@code WebConfig} that previously lived here has been removed.
- * Upload static-resource mapping is handled via {@code spring.web.resources.static-locations}
- * in {@code application.properties}.</p>
+ * <p>Uploaded images are served by {@code com.booksys.roomtype.WebConfig}
+ * ({@code /uploads/**} and {@code /roomtype/**}).</p>
  */
 @Service
 @RequiredArgsConstructor

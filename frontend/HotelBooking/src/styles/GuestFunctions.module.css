@@ -234,3 +234,34 @@
     font-weight: 600;
     font-size: 1rem;
 }
+
+/* ── Cancel confirmation and notes ──────────────────────────────── */
+.cardActions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.confirmText { font-size: 0.85rem; font-weight: 600; color: #b91c1c; }
+.keepBtn {
+    padding: 9px 18px;
+    background: #fff;
+    color: #334155;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.policyNote {
+    padding: 0 20px 14px;
+    font-size: 0.78rem;
+    color: #64748b;
+    margin: 0;
+}
+.secondaryLink {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4f46e5;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}

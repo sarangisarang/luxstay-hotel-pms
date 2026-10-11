@@ -74,6 +74,9 @@ public final class OnlineBookingDtos {
             String currency,
             String bookingStatus,
             String paymentStatus,
-            String paymentOption
+            String paymentOption,
+            String checkInTime,     // hotel's check-in time, e.g. "15:00" (null if not set)
+            String checkOutTime,    // hotel's check-out time, e.g. "11:00" (null if not set)
+            String manageToken      // lets the booker view/cancel THIS booking (manage page)
     ) {}
 }

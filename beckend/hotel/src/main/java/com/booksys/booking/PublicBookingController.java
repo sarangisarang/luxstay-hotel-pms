@@ -1,6 +1,5 @@
 package com.booksys.booking;
 
-import com.booksys.guest.GuestRepository;
 import com.booksys.hotel.Hotel;
 import com.booksys.hotel.HotelRepository;
 import com.booksys.room.Room;
@@ -8,11 +7,9 @@ import com.booksys.room.RoomRepository;
 import com.booksys.room.RoomStatus;
 import com.booksys.service.ServiceRepository;
 import com.booksys.pricing.BookingQuote;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -31,6 +28,7 @@ import java.util.UUID;
  *   3b. POST /api/public/stripe/create-payment-intent → room held, Stripe PaymentIntent created
  *       → guest pays with the Stripe Payment Element (card data never reaches this server)
  *       → POST /confirm-payment (and the Stripe webhook) verify the payment and confirm the booking
+ *   4. Viewing / cancelling later: {@link ManageBookingController} (signed link, no e-mail-only access)
  */
 @Slf4j
 @RestController
@@ -40,7 +38,6 @@ public class PublicBookingController {
 
     private final BookingRepository    bookingRepository;
     private final RoomRepository       roomRepository;
-    private final GuestRepository      guestRepository;
     private final HotelRepository      hotelRepository;
     private final ServiceRepository    serviceRepository;
     private final OnlineBookingService onlineBookingService;
@@ -119,33 +116,6 @@ public class PublicBookingController {
         return ResponseEntity.ok(free);
     }
 
-    /**
-     * Guest self-service: look up all bookings for an email address.
-     * No authentication required — email is the only identifier for public guests.
-     */
-    @GetMapping("/my-bookings")
-    public ResponseEntity<?> myBookings(@RequestParam String email) {
-        if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "email is required"));
-        }
-        var bookings = bookingRepository.findByGuestEmail(email.trim().toLowerCase());
-        var result = bookings.stream().map(b -> {
-            var room  = b.getRoom();
-            var hotel = room != null && room.getHotel() != null ? room.getHotel().getName() : "";
-            return Map.<String, Object>of(
-                    "id",            b.getId(),
-                    "hotel",         hotel,
-                    "roomNumber",    room != null && room.getRoomNumber() != null ? room.getRoomNumber() : 0,
-                    "checkIn",       b.getCheckInDate() != null  ? b.getCheckInDate().toString()  : "",
-                    "checkOut",      b.getCheckOutDate() != null ? b.getCheckOutDate().toString() : "",
-                    "status",        b.getBookingStatus() != null ? b.getBookingStatus().name() : "",
-                    "paymentStatus", b.getPaymentStatus() != null ? b.getPaymentStatus().name() : "",
-                    "total",         b.getTotalAmount() != null ? b.getTotalAmount() : BigDecimal.ZERO
-            );
-        }).toList();
-        return ResponseEntity.ok(result);
-    }
-
     // ── Online booking: options, quote, pay at hotel, confirm online payment ──
 
     /** Which payment options the website should offer (pay at hotel / online). */
@@ -183,39 +153,6 @@ public class PublicBookingController {
     public ResponseEntity<OnlineBookingDtos.BookingConfirmation> confirmPayment(
             @RequestBody OnlineBookingDtos.ConfirmPaymentRequest req) {
         return ResponseEntity.ok(onlineBookingService.confirmStripePayment(req.paymentIntentId()));
-    }
-
-    /**
-     * Guest self-service: cancel a booking by ID, verified against guest email.
-     */
-    @PostMapping("/{id}/cancel")
-    @Transactional
-    public ResponseEntity<?> cancelBooking(@PathVariable UUID id, @RequestParam String email) {
-        var booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
-        if (booking.getGuest() == null
-                || !booking.getGuest().getEmail().equalsIgnoreCase(email.trim())) {
-            return ResponseEntity.status(403).body(Map.of("error", "Email does not match booking"));
-        }
-        if (booking.getBookingStatus() == BookingStatus.CHECKED_IN
-                || booking.getBookingStatus() == BookingStatus.COMPLETED
-                || booking.getBookingStatus() == BookingStatus.CHECKED_OUT) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Cannot cancel a booking that has already started"));
-        }
-        if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Booking is already cancelled"));
-        }
-        booking.setBookingStatus(BookingStatus.CANCELLED);
-        bookingRepository.save(booking);
-
-        // Free the room if it was reserved for this booking
-        if (booking.getRoom() != null) {
-            booking.getRoom().setRoomStatus(RoomStatus.FREE);
-            roomRepository.save(booking.getRoom());
-        }
-        log.info("Public cancel: booking {} cancelled by guest {}", id, email);
-        return ResponseEntity.ok(Map.of("message", "Booking cancelled successfully"));
     }
 
     private Map<String, Object> toPublicRoomView(Room r) {

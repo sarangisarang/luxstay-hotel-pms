@@ -27,8 +27,33 @@ public class EmailService {
     @Value("${app.mail.from-name}")
     private String fromName;
 
+    /**
+     * Texts of the confirmation e-mail that depend on the booking: it used to
+     * say "payment received" / "Total Charged" and "check-in from 14:00" for
+     * every booking, including unpaid ones and hotels with other times.
+     */
+    public record ConfirmationDetails(
+            String paymentNote,     // e.g. "Payment: at the hotel on arrival."
+            String totalLabel,      // e.g. "Total to pay at the hotel"
+            String totalText,       // formatted amount incl. currency
+            String checkInFrom,     // hotel check-in time, or null
+            String checkOutUntil,   // hotel check-out time, or null
+            String manageLink       // personal manage-booking link, or null
+    ) {
+        static ConfirmationDetails defaults(BookingEmailData data) {
+            BigDecimal total = data.total() != null ? data.total() : BigDecimal.ZERO;
+            return new ConfirmationDetails("Your booking is confirmed.", "Total",
+                    "€" + total.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString(), null, null, null);
+        }
+    }
+
     @Async
     public void sendBookingConfirmation(BookingEmailData data) {
+        sendBookingConfirmation(data, ConfirmationDetails.defaults(data));
+    }
+
+    @Async
+    public void sendBookingConfirmation(BookingEmailData data, ConfirmationDetails details) {
         if (data.guestEmail() == null || data.guestEmail().isBlank()) {
             log.warn("Skipping confirmation email — no guest email for booking {}", data.bookingRef());
             return;
@@ -43,6 +68,12 @@ public class EmailService {
             ctx.setVariable("checkOut",   data.checkOut().toString());
             ctx.setVariable("nights",     data.nights());
             ctx.setVariable("total",      data.total() != null ? data.total() : BigDecimal.ZERO);
+            ctx.setVariable("paymentNote",   details.paymentNote());
+            ctx.setVariable("totalLabel",    details.totalLabel());
+            ctx.setVariable("totalText",     details.totalText());
+            ctx.setVariable("checkInFrom",   details.checkInFrom());
+            ctx.setVariable("checkOutUntil", details.checkOutUntil());
+            ctx.setVariable("manageLink",    details.manageLink());
 
             String html = templateEngine.process("email/booking-confirmation", ctx);
             sendEmail(data.guestEmail(), "✅ Booking Confirmed — " + data.hotelName(), html);
@@ -85,6 +116,21 @@ public class EmailService {
             sendEmail(data.guestEmail(), "🏨 Check-in Tomorrow — " + data.hotelName(), html);
         } catch (Exception e) {
             log.error("Failed to send reminder email: {}", e.getMessage());
+        }
+    }
+
+    /** Sends the signed "manage my booking" link (only ever to the address it was requested for). */
+    @Async
+    public void sendManageBookingLink(String to, String link, int bookingCount) {
+        try {
+            Context ctx = new Context();
+            ctx.setVariable("link", link);
+            ctx.setVariable("count", bookingCount);
+            String html = templateEngine.process("email/manage-link", ctx);
+            sendEmail(to, "Your booking link", html);
+            log.info("Manage-booking link sent");
+        } catch (Exception e) {
+            log.error("Failed to send manage-booking link: {}", e.getMessage());
         }
     }
 

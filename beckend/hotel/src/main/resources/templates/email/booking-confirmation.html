@@ -54,7 +54,7 @@
     <p class="greeting">
       Dear <strong th:text="${guestName}">Guest</strong>,<br/>
       Thank you for choosing <strong th:text="${hotel}">LuxStay Hotel</strong>.
-      Your booking has been confirmed and payment received.
+      <span th:text="${paymentNote}">Your booking is confirmed.</span>
     </p>
 
     <div class="card">
@@ -87,13 +87,20 @@
     </div>
 
     <div class="total-row">
-      <span class="total-label">Total Charged</span>
-      <span class="total-value" th:text="'€' + ${#numbers.formatDecimal(total,1,'POINT',2,'COMMA')}">€480.00</span>
+      <span class="total-label" th:text="${totalLabel}">Total</span>
+      <span class="total-value" th:text="${totalText}">€480.00</span>
     </div>
 
     <div class="note">
       📋 <strong>What to bring:</strong> a valid photo ID and this confirmation email.
-      Check-in is from 14:00, check-out by 11:00.
+      <span th:if="${checkInFrom != null}" th:text="'Check-in is from ' + ${checkInFrom} + '.'">Check-in is from 15:00.</span>
+      <span th:if="${checkOutUntil != null}" th:text="'Check-out by ' + ${checkOutUntil} + '.'">Check-out by 11:00.</span>
+    </div>
+
+    <div class="note" th:if="${manageLink != null}">
+      To view or cancel this booking online, use your personal link:
+      <a th:href="${manageLink}" href="#">Manage my booking</a>.
+      Do not forward this e-mail: the link works for anyone who has it.
     </div>
   </div>
 

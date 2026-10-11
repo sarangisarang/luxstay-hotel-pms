@@ -44,8 +44,12 @@ public class JwtService {
     }
 
     private Claims parseAllClaims(String token) {
+        // Issuer and audience are checked too, so a token signed with the same
+        // key for another purpose (or another deployment) is not accepted here.
         return Jwts.parser()
                 .verifyWith(getSigningKey())
+                .requireIssuer(issuer)
+                .requireAudience(audience)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

@@ -2,17 +2,12 @@ package com.booksys.roomtype;
 import com.booksys.pricing.DynamicPricingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +25,7 @@ public class RoomTypeController {
     private final RoomTypeMapper roomTypeMapper;
     private final FileStorageUtil fileStorageUtil;
     private final DynamicPricingService dynamicPricingService;
+    private final com.booksys.upload.ImageUploadService imageUploadService;
 
 
     @PostMapping
@@ -99,16 +95,14 @@ public class RoomTypeController {
         ));
     }
 
-    @GetMapping(value = "/roomtype/{filename:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<Resource> getRoomTypeImage(@PathVariable String filename) throws IOException {
-        Path file = Paths.get("uploads/roomtype").resolve(filename);
-        Resource resource = new UrlResource(file.toUri());
-        if (resource.exists() || resource.isReadable()) {
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-                    .body(resource);
-        } else {
-            throw new FileNotFoundException("Could not read file: " + filename);
-        }
+    /** Room-type picture; only stored image files, no path traversal. */
+    @GetMapping("/roomtype/{filename:.+}")
+    public ResponseEntity<Resource> getRoomTypeImage(@PathVariable String filename) {
+        return imageUploadService.find("roomtype", filename)
+                .<ResponseEntity<Resource>>map(path -> ResponseEntity.ok()
+                        .contentType(com.booksys.upload.ImageUploadService.mediaTypeOf(filename).orElseThrow())
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                        .body(new org.springframework.core.io.FileSystemResource(path)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

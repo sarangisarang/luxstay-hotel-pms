@@ -36,10 +36,14 @@ export function useStompClient(
 
     useEffect(() => {
         const socketUrl = `${wsBase.replace(/\/$/, "")}/ws`;
+        // The server accepts the STOMP CONNECT only with a valid login token
+        // and only lets guests into conversations of their own bookings.
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
         const client = new Client({
             webSocketFactory: () => new SockJS(socketUrl),
+            connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
             reconnectDelay: 3000,
-            debug: (str) => console.log("[STOMP]", str),
+            debug: () => {},
         });
 
         client.onConnect = () => {

@@ -1,37 +1,29 @@
 package com.booksys.hotel;
 
+import com.booksys.upload.ImageUploadService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.Objects;
+import java.io.UncheckedIOException;
 import java.util.UUID;
 
+/** Stores hotel pictures via {@link ImageUploadService} (validated, random file name). */
 @Service
 public class ImageServiceImpl implements ImageService {
 
-    private final Path uploadPath = Paths.get("uploads");
+    private final ImageUploadService images;
 
-    public ImageServiceImpl() {
-        try {
-            Files.createDirectories(uploadPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not create upload directory!", e);
-        }
+    public ImageServiceImpl(ImageUploadService images) {
+        this.images = images;
     }
 
     @Override
     public String save(MultipartFile file, UUID hotelId) {
         try {
-            String extension = Objects.requireNonNull(file.getOriginalFilename())
-                    .substring(file.getOriginalFilename().lastIndexOf("."));
-            String filename = hotelId.toString() + extension;
-
-            Path targetLocation = uploadPath.resolve(filename);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            return filename;
+            return images.store(file, "");
         } catch (IOException e) {
-            throw new RuntimeException("Failed to store file: " + e.getMessage(), e);
+            throw new UncheckedIOException("Could not store the image", e);
         }
     }
 }

@@ -78,6 +78,11 @@ public class OnlineBookingService {
     private final EmailService emailService;
     private final NotificationService notificationService;
     private final OnlineBookingSettings settings;
+    private final BookingManageTokens manageTokens;
+    private final com.booksys.user.CurrentUser currentUser;
+
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.base-url:http://localhost:3000}")
+    private String frontendBaseUrl = "http://localhost:3000";
 
     // ── Read-only ─────────────────────────────────────────────────────────────
 
@@ -339,9 +344,21 @@ public class OnlineBookingService {
         return booking;
     }
 
-    /** Reuses the guest record of a returning guest (matched by email) without overwriting it. */
+    /**
+     * Guest record for the booking. A logged-in guest account books as itself.
+     * Otherwise a returning guest's record (matched by e-mail) is reused only if
+     * it is not linked to a registered account: registration does not verify
+     * e-mail ownership, so linking by e-mail alone would show this booking to
+     * whoever registered the address.
+     */
     private Guest findOrCreateGuest(BookingRequest req, String email) {
-        return guestRepository.findFirstByEmailIgnoreCase(email).orElseGet(() -> {
+        java.util.Optional<Guest> accountGuest = com.booksys.user.CurrentUser.authentication()
+                .filter(a -> com.booksys.user.CurrentUser.hasRole(a, "USER"))
+                .flatMap(a -> currentUser.guestOf(a.getName()));
+        if (accountGuest.isPresent()) {
+            return accountGuest.get();
+        }
+        return guestRepository.findFirstByEmailIgnoreCaseAndAppUserIsNull(email).orElseGet(() -> {
             Guest g = new Guest();
             g.setFirstName(req.firstName().trim());
             g.setLastName(req.lastName().trim());
@@ -419,16 +436,28 @@ public class OnlineBookingService {
         try {
             Guest guest = booking.getGuest();
             Room room = booking.getRoom();
+            com.booksys.hotel.Hotel hotel = room != null ? room.getHotel() : null;
+            boolean paid = booking.getPaymentStatus() == PaymentStatus.PAID;
+            String total = formatMoney(booking.getTotalAmount(), currencyOf(booking));
+            String manageLink = frontendBaseUrl.replaceAll("/+$", "") + "/book/manage?token=" + manageTokenFor(booking);
             emailService.sendBookingConfirmation(new BookingEmailData(
                     referenceOf(booking),
                     guest.getEmail(),
                     booking.getGuestName(),
-                    room != null && room.getHotel() != null ? room.getHotel().getName() : "",
+                    hotel != null ? hotel.getName() : "",
                     String.valueOf(booking.getRoomNumber()),
                     booking.getCheckInDate(),
                     booking.getCheckOutDate(),
                     booking.getCheckOutDate().toEpochDay() - booking.getCheckInDate().toEpochDay(),
-                    booking.getTotalAmount()));
+                    booking.getTotalAmount()),
+                    new EmailService.ConfirmationDetails(
+                            paid ? "Your booking is confirmed and the payment has been received."
+                                 : "Your booking is confirmed. You pay at the hotel.",
+                            paid ? "Total paid" : "Total to pay at the hotel",
+                            total,
+                            hotel != null ? trimToNull(hotel.getCheckInTime(), 10) : null,
+                            hotel != null ? trimToNull(hotel.getCheckOutTime(), 10) : null,
+                            manageLink));
         } catch (Exception e) {
             log.warn("Confirmation email failed for booking {}: {}", booking.getId(), e.getMessage());
         }
@@ -446,18 +475,35 @@ public class OnlineBookingService {
 
     private BookingConfirmation confirmationOf(Booking b, String option) {
         Room room = b.getRoom();
+        com.booksys.hotel.Hotel hotel = room != null ? room.getHotel() : null;
         return new BookingConfirmation(
                 b.getId(), referenceOf(b), b.getGuestName(),
                 b.getGuest() != null ? b.getGuest().getEmail() : null,
-                room != null && room.getHotel() != null ? room.getHotel().getName() : "",
+                hotel != null ? hotel.getName() : "",
                 b.getRoomNumber(), b.getCheckInDate(), b.getCheckOutDate(),
                 b.getTotalAmount(), currencyOf(b),
-                b.getBookingStatus().name(), b.getPaymentStatus().name(), option);
+                b.getBookingStatus().name(), b.getPaymentStatus().name(), option,
+                hotel != null ? trimToNull(hotel.getCheckInTime(), 10) : null,
+                hotel != null ? trimToNull(hotel.getCheckOutTime(), 10) : null,
+                manageTokenFor(b));
+    }
+
+    /** Booking-scoped manage token, valid until 30 days after check-out. */
+    private String manageTokenFor(Booking b) {
+        LocalDate until = (b.getCheckOutDate() != null ? b.getCheckOutDate() : LocalDate.now()).plusDays(30);
+        return manageTokens.forBooking(b.getId(), until.atStartOfDay(java.time.ZoneOffset.UTC).toInstant());
     }
 
     /** Short reference printed on emails and invoices. */
     static String referenceOf(Booking b) {
         return b.getId().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+    }
+
+    /** "€237.50" for EUR, otherwise "237.50 CHF". */
+    static String formatMoney(BigDecimal amount, String currency) {
+        String value = (amount != null ? amount : BigDecimal.ZERO)
+                .setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
+        return "EUR".equals(currency) ? "€" + value : value + " " + currency;
     }
 
     private static String currencyOf(Booking b) {

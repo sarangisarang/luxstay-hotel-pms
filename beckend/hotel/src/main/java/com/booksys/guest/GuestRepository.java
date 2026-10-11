@@ -24,4 +24,15 @@ public interface GuestRepository extends JpaRepository<Guest, UUID> {
 
     /** Case-insensitive lookup; tolerates legacy duplicates by taking the first match. */
     Optional<Guest> findFirstByEmailIgnoreCase(String email);
+
+    /**
+     * Guest record with this e-mail that is NOT linked to a registered account.
+     * Anonymous website bookings may only reuse such records: registration does
+     * not verify e-mail ownership, so attaching a booking to an account's guest
+     * profile by e-mail alone would show it to whoever registered that address.
+     */
+    Optional<Guest> findFirstByEmailIgnoreCaseAndAppUserIsNull(String email);
+
+    /** Guest profile of a registered guest account. */
+    Optional<Guest> findFirstByAppUser_Email(String accountEmail);
 }

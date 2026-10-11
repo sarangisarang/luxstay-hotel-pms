@@ -43,6 +43,9 @@ export default function ConfirmationPage() {
     bookingStatus: params.get("bookingStatus") ?? undefined,
     paymentStatus: params.get("paymentStatus") ?? undefined,
     paymentOption: params.get("paymentOption") ?? undefined,
+    checkInTime:   params.get("checkInTime") || undefined,
+    checkOutTime:  params.get("checkOutTime") || undefined,
+    manageToken:   params.get("manageToken") || undefined,
   };
 
   const [booking, setBooking] = useState<Partial<BookingConfirmation>>(fromQuery);
@@ -155,8 +158,25 @@ export default function ConfirmationPage() {
           <ul className={s.nextList}>
             <li>{t("nextCheckInbox", "Check your inbox for the confirmation email.")}</li>
             <li>{t("nextPresentRef", "Show your booking reference at the front desk.")}</li>
-            <li>{t("nextCheckInTime", "Check-in starts at the time stated by the hotel.")}</li>
+            <li>
+              {booking.checkInTime && booking.checkOutTime
+                ? t("checkInOutWindow", {
+                    checkIn: booking.checkInTime,
+                    checkOut: booking.checkOutTime,
+                    defaultValue: "Check-in from {{checkIn}} · check-out by {{checkOut}}",
+                  })
+                : t("checkInTimeFromHotel", "Check-in starts at the time stated by the hotel.")}
+            </li>
           </ul>
+          {booking.manageToken && !error && (
+            <p className={s.manageHint}>
+              <Link href={`/book/manage?token=${encodeURIComponent(booking.manageToken)}`}>
+                {t("manageThisBooking", "View or cancel this booking")}
+              </Link>
+              {" · "}
+              {t("manageLinkPrivate", "Keep this link private: it works without a password.")}
+            </p>
+          )}
         </div>
 
         <div className={s.actions}>
