@@ -1,0 +1,11 @@
+# Keep the Docker build context small and free of local data
+target/
+logs/
+uploads/
+roomtype/
+.idea/
+.vscode/
+*.iml
+.env
+.env.*
+qodana.sarif.json

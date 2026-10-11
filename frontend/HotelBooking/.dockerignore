@@ -1,0 +1,9 @@
+# Never send local dependencies, build output or env files into the image
+node_modules/
+.next/
+out/
+npm-debug.log*
+.env
+.env.*
+.vscode/
+.idea/

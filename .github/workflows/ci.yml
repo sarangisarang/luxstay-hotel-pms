@@ -4,7 +4,6 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
 
 
 jobs:
@@ -61,9 +60,9 @@ jobs:
           name: backend-test-results
           path: beckend/hotel/target/surefire-reports/
 
-  # ── 2. Frontend: type-check + build ─────────────────────────────────────────
+  # ── 2. Frontend: dependency audit + type-check + build ──────────────────────
   frontend:
-    name: Frontend (Node 20 / Next.js)
+    name: Frontend (Node 22 / Next.js)
     runs-on: ubuntu-latest
 
     defaults:
@@ -73,15 +72,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node 20
+      - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: frontend/HotelBooking/package-lock.json
 
+      # Plain `npm ci` on purpose: it is exactly what the Dockerfile runs, so a
+      # peer-dependency conflict fails here instead of during a deploy.
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Type check
         run: npx tsc --noEmit
@@ -91,11 +95,25 @@ jobs:
         env:
           NEXT_PUBLIC_API_BASE: http://localhost:8080
 
-  # ── 3. Notify Render deploy (auto-deploy handles the rest) ──────────────────
+  # ── 3. Docker images: make sure both Dockerfiles build from a clean clone ───
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t luxstay-backend:ci beckend/hotel
+
+      - name: Build frontend image
+        run: docker build --build-arg BACKEND_URL=http://backend:8080 -t luxstay-frontend:ci frontend/HotelBooking
+
+  # ── 4. Notify Render deploy (auto-deploy handles the rest) ──────────────────
   notify:
     name: CI Complete
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend, frontend, docker]
     if: github.ref == 'refs/heads/main'
 
     steps:

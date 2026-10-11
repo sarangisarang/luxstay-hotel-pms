@@ -1,0 +1,29 @@
+# Weekly dependency update PRs, so security fixes are not discovered months late.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /beckend/hotel
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /frontend/HotelBooking
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker
+    directory: /beckend/hotel
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /frontend/HotelBooking
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
