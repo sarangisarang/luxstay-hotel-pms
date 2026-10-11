@@ -4,7 +4,6 @@ import com.booksys.booking.Booking;
 import com.booksys.booking.BookingRepository;
 import com.booksys.booking.BookingStatus;
 import com.booksys.guest.Guest;
-import com.booksys.invoice.InvoiceDTO;
 import com.booksys.invoice.InvoiceService;
 import com.booksys.loyalty.GuestLoyalty;
 import com.booksys.loyalty.GuestLoyaltyRepository;
@@ -44,6 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final InvoiceService invoiceService;
     private final GuestLoyaltyRepository loyaltyRepository;
+    private final BookingPaymentSync paymentSync;
 
     /**
      * Returns all payments in the system.
@@ -56,33 +56,83 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Saves a new payment and links it to the specified booking.
-     * If the payment status is {@link PaymentStatus#PAID}, the booking's payment status
-     * and — when already checked out — its booking status are advanced automatically.
+     * Records a payment for a booking.
      *
-     * @param requestDTO DTO with payment amount, method, status, and booking ID
+     * <p>A booking gets a PENDING placeholder payment when it is created. Money
+     * received is written into that placeholder instead of a second row (the
+     * old code inserted a second row and failed on a unique constraint). Further
+     * payments — a deposit followed by the balance — become additional rows.</p>
+     *
+     * <p>The booking's payment status and its invoice are then derived from the
+     * payment rows by {@link BookingPaymentSync#recalculate(Booking)}.</p>
+     *
+     * @param requestDTO booking ID, amount, method, optional status (default PAID) and date
      * @return the persisted payment as a DTO
-     * @throws EntityNotFoundException if no booking with the given ID exists
+     * @throws EntityNotFoundException  if no booking with the given ID exists
+     * @throws IllegalArgumentException if amount, method or status are invalid
+     * @throws IllegalStateException    if the booking is cancelled or the amount exceeds the balance
      */
     @Override
     public PaymentResponseDTO savePayment(PaymentRequestDTO requestDTO) {
+        if (requestDTO.getBookingId() == null) {
+            throw new IllegalArgumentException("Booking is required");
+        }
         Booking booking = bookingRepository.findById(requestDTO.getBookingId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Booking not found: " + requestDTO.getBookingId()));
-
-        Payment payment = PaymentMapper.toEntity(requestDTO);
-        payment.setBooking(booking);
-        Payment saved = paymentRepository.save(payment);
-
-        if (payment.getStatus() == PaymentStatus.PAID) {
-            booking.setPaymentStatus(PaymentStatus.PAID);
-            if (booking.getBookingStatus() == BookingStatus.CHECKED_OUT) {
-                booking.setBookingStatus(BookingStatus.COMPLETED);
-            }
-            bookingRepository.save(booking);
+        if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot record a payment for a cancelled booking");
         }
 
+        BigDecimal amount = requestDTO.getAmount();
+        if (amount == null || amount.signum() <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+        String method = requestDTO.getPaymentMethod() == null ? "" : requestDTO.getPaymentMethod().trim();
+        if (method.isEmpty()) {
+            throw new IllegalArgumentException("Payment method is required");
+        }
+        PaymentStatus status = parseRecordableStatus(requestDTO.getStatus());
+
+        if (status == PaymentStatus.PAID) {
+            BigDecimal outstanding = paymentSync.outstanding(booking);
+            if (amount.compareTo(outstanding) > 0) {
+                throw new IllegalStateException(outstanding.signum() == 0
+                        ? "This booking is already fully paid"
+                        : "Amount exceeds the outstanding balance of " + outstanding.toPlainString());
+            }
+        }
+
+        // Money received completes the open placeholder; anything else is a new row
+        Payment payment = status == PaymentStatus.PAID
+                ? paymentSync.pendingPlaceholder(booking).orElseGet(() -> BookingPaymentSync.newPaymentFor(booking))
+                : BookingPaymentSync.newPaymentFor(booking);
+        payment.setAmount(amount);
+        payment.setPaymentMethod(method);
+        payment.setStatus(status);
+        payment.setPaymentDate(requestDTO.getPaymentDate() != null
+                ? requestDTO.getPaymentDate().atTime(java.time.LocalTime.now())
+                : java.time.LocalDateTime.now());
+        payment.setCardLast4(PaymentMapper.lastFour(requestDTO.getCardNumber()));
+        Payment saved = paymentRepository.save(payment);
+
+        paymentSync.recalculate(booking);
         return toDTO(saved);
+    }
+
+    /** Only PAID (money received) and PENDING (e.g. card terminal pending) can be recorded here. */
+    private static PaymentStatus parseRecordableStatus(String raw) {
+        if (raw == null || raw.isBlank()) return PaymentStatus.PAID;
+        PaymentStatus status;
+        try {
+            status = PaymentStatus.valueOf(raw.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown payment status: " + raw);
+        }
+        if (status != PaymentStatus.PAID && status != PaymentStatus.PENDING) {
+            throw new IllegalArgumentException("A new payment can only be PAID or PENDING");
+        }
+        return status;
     }
 
     /**
@@ -148,11 +198,10 @@ public class PaymentServiceImpl implements PaymentService {
             throw new EntityNotFoundException("Payment has no linked booking");
         }
 
-        // Auto-create invoice if it does not exist, then mark it PAID
-        InvoiceDTO invoice = invoiceService.getOrCreateForBooking(booking.getId());
-        if (!"PAID".equals(invoice.getStatus())) {
-            invoiceService.markAsPaid(invoice.getId());
-        }
+        // Make sure an invoice exists, then let the booking status and the
+        // invoice follow from the payment rows (fully paid → invoice PAID)
+        invoiceService.getOrCreateForBooking(booking.getId());
+        paymentSync.recalculate(booking);
 
         // Award loyalty points: 1 point per €10 spent
         try {

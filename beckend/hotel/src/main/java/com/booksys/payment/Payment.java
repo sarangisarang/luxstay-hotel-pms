@@ -44,7 +44,16 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
-    @OneToOne
+    /** Stripe PaymentIntent ID or another receipt reference, for reconciliation. */
+    @Column(name = "external_reference")
+    private String externalReference;
+
+    /**
+     * A booking can have several payments (deposit + balance, split bills),
+     * so this is many-to-one; the old one-to-one made a second payment fail
+     * with a unique-constraint error.
+     */
+    @ManyToOne
     @JoinColumn(name = "booking_id")
     private Booking booking;
 }

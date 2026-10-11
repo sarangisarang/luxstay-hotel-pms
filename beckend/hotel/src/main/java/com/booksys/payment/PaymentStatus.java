@@ -7,5 +7,7 @@ public enum PaymentStatus {
     UNPAID,
     FAILED,
     REFUNDED,
-    REFUND_REQUIRED
+    REFUND_REQUIRED,
+    /** Booking level only: some money received, but less than the booking total. */
+    PARTIALLY_PAID
 }

@@ -158,4 +158,24 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
            "AND b.bookingStatus <> com.booksys.booking.BookingStatus.CANCELLED " +
            "GROUP BY b.guest.email HAVING COUNT(b) >= :minBookings")
     List<String> findVipGuestEmails(@Param("minBookings") long minBookings);
+
+    // ── Online booking (public website) ─────────────────────────────────────
+
+    /** Locks the booking of a Stripe PaymentIntent, so the webhook and the browser cannot confirm it twice. */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Booking b WHERE b.stripePaymentIntentId = :paymentIntentId")
+    Optional<Booking> findByStripePaymentIntentIdForUpdate(@Param("paymentIntentId") String paymentIntentId);
+
+    /** Active bookings of an email address that have not ended yet (abuse limit for anonymous bookings). */
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.guest IS NOT NULL AND LOWER(b.guest.email) = LOWER(:email) " +
+           "AND b.bookingStatus <> com.booksys.booking.BookingStatus.CANCELLED AND b.checkOutDate >= :today")
+    long countOpenBookingsForEmail(@Param("email") String email, @Param("today") LocalDate today);
+
+    /** Website bookings still waiting for their online payment after the hold time. */
+    @Query("SELECT b FROM Booking b WHERE b.bookingSource = com.booksys.booking.BookingSource.DIRECT_WEBSITE " +
+           "AND b.stripePaymentIntentId IS NOT NULL " +
+           "AND b.bookingStatus = com.booksys.booking.BookingStatus.PENDING " +
+           "AND b.paymentStatus IN (com.booksys.payment.PaymentStatus.PENDING, com.booksys.payment.PaymentStatus.FAILED) " +
+           "AND b.createdAt < :cutoff")
+    List<Booking> findStaleOnlineHolds(@Param("cutoff") java.time.LocalDateTime cutoff);
 }

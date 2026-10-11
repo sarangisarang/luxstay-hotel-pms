@@ -21,4 +21,7 @@ public interface GuestRepository extends JpaRepository<Guest, UUID> {
     List<Guest> findByFirstName(String firstName);
     Optional<Guest> findById(UUID uuid);
     Optional<Guest> findByEmail(String email);
+
+    /** Case-insensitive lookup; tolerates legacy duplicates by taking the first match. */
+    Optional<Guest> findFirstByEmailIgnoreCase(String email);
 }

@@ -47,6 +47,16 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // The backend reports problems as {"error": "..."}; most forms read
+        // `data.message` or `error.message`. Mirror the server text into both
+        // so the user sees "Amount exceeds the outstanding balance" instead of
+        // "Request failed with status code 409".
+        const data = error.response?.data;
+        if (data && typeof data === "object" && typeof data.error === "string") {
+            if (!data.message) data.message = data.error;
+            error.message = data.error;
+        }
+
         if (
             error.response?.status !== 401 ||
             originalRequest._retry ||

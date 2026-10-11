@@ -2,7 +2,7 @@ package com.booksys.stripe;
 
 import com.booksys.booking.Booking;
 import com.booksys.booking.BookingRepository;
-import com.booksys.booking.BookingStatus;
+import com.booksys.booking.OnlineBookingService;
 import com.booksys.payment.Payment;
 import com.booksys.payment.PaymentRepository;
 import com.booksys.payment.PaymentStatus;
@@ -28,7 +28,7 @@ import java.util.Optional;
  *   Events       : payment_intent.succeeded, payment_intent.payment_failed,
  *                  charge.refunded
  *
- * Set the signing secret as env var STRIPE_WEBHOOK_SECRET (mandatory — app refuses to start without it).
+ * Set the signing secret as env var STRIPE_WEBHOOK_SECRET (required when STRIPE_ENABLED=true).
  */
 @Slf4j
 @RestController
@@ -36,16 +36,27 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StripeWebhookController {
 
-    private final BookingRepository  bookingRepository;
-    private final PaymentRepository  paymentRepository;
+    private final BookingRepository    bookingRepository;
+    private final PaymentRepository    paymentRepository;
+    private final OnlineBookingService onlineBookingService;
 
     @Value("${stripe.webhook-secret}")
     private String webhookSecret;
 
+    @Value("${app.payments.stripe.enabled:false}")
+    private boolean stripeEnabled;
+
+    /**
+     * With online payment switched on, a missing signing secret would mean
+     * every webhook is rejected (or, worse, nobody notices). Fail at startup
+     * instead. With online payment off the webhook is unused.
+     */
     @PostConstruct
     public void validateStripeWebhookSecret() {
-        if (webhookSecret == null || webhookSecret.isBlank()) {
-            throw new IllegalStateException("STRIPE_WEBHOOK_SECRET is required and must not be empty.");
+        if (stripeEnabled && (webhookSecret == null || webhookSecret.isBlank()
+                || webhookSecret.contains("dummy") || webhookSecret.equals("whsec_..."))) {
+            throw new IllegalStateException(
+                    "STRIPE_WEBHOOK_SECRET must be set to the real signing secret when STRIPE_ENABLED=true.");
         }
     }
 
@@ -77,27 +88,30 @@ public class StripeWebhookController {
         return ResponseEntity.ok("received");
     }
 
+    /**
+     * Confirms the booking through the same verification as the browser path
+     * (status, amount, currency, booking reference). Idempotent: if the browser
+     * already confirmed it, nothing changes.
+     */
     private void handleSucceeded(Event event) {
-        extractPaymentIntentId(event).ifPresent(piId ->
-            bookingRepository.findByStripePaymentIntentId(piId).ifPresent(b -> {
-                if (b.getPaymentStatus() != PaymentStatus.PAID) {
-                    b.setPaymentStatus(PaymentStatus.PAID);
-                    bookingRepository.save(b);
-                    log.info("Webhook: booking {} marked PAID via PaymentIntent {}", b.getId(), piId);
-                }
-            })
-        );
+        extractPaymentIntentId(event).ifPresent(piId -> {
+            try {
+                onlineBookingService.confirmStripePayment(piId);
+                log.info("Webhook: PaymentIntent {} confirmed", piId);
+            } catch (RuntimeException e) {
+                // Unknown intent (e.g. created outside the booking flow) or a
+                // mismatch: log loudly, but answer 200 so Stripe does not retry forever.
+                log.error("Webhook: could not confirm PaymentIntent {}: {}", piId, e.getMessage());
+            }
+        });
     }
 
+    /** A failed attempt: the guest may retry until the room hold expires. */
     private void handleFailed(Event event) {
-        extractPaymentIntentId(event).ifPresent(piId ->
-            bookingRepository.findByStripePaymentIntentId(piId).ifPresent(b -> {
-                b.setPaymentStatus(PaymentStatus.FAILED);
-                b.setBookingStatus(BookingStatus.CANCELLED);
-                bookingRepository.save(b);
-                log.warn("Webhook: booking {} payment FAILED (PaymentIntent {})", b.getId(), piId);
-            })
-        );
+        extractPaymentIntentId(event).ifPresent(piId -> {
+            onlineBookingService.markStripePaymentFailed(piId);
+            log.warn("Webhook: payment attempt failed for PaymentIntent {}", piId);
+        });
     }
 
     private void handleRefunded(Event event) {
@@ -105,7 +119,11 @@ public class StripeWebhookController {
             bookingRepository.findByStripePaymentIntentId(piId).ifPresent(b -> {
                 b.setPaymentStatus(PaymentStatus.REFUNDED);
                 bookingRepository.save(b);
-                paymentRepository.findFirstByBookingId(b.getId())
+                // Several payments can exist per booking: refund the one Stripe charged
+                paymentRepository.findByBookingId(b.getId()).stream()
+                        .filter(p -> piId.equals(p.getExternalReference()))
+                        .findFirst()
+                        .or(() -> paymentRepository.findFirstByBookingId(b.getId()))
                         .ifPresent(p -> { p.setStatus(PaymentStatus.REFUNDED); paymentRepository.save(p); });
                 log.info("Webhook: booking {} REFUNDED (PaymentIntent {})", b.getId(), piId);
             })

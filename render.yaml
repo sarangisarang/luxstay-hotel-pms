@@ -33,6 +33,9 @@ services:
         value: pk_test_REPLACE_ME
       - key: STRIPE_WEBHOOK_SECRET
         value: whsec_dev_dummy
+      # Online payment stays off until real Stripe keys and the webhook are set
+      - key: STRIPE_ENABLED
+        value: "false"
       - key: MAIL_HOST
         value: smtp.gmail.com
       - key: MAIL_PORT

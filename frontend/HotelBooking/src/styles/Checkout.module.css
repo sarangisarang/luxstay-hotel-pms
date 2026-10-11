@@ -387,3 +387,85 @@
     font-size: 1.25rem;
     color: #15803d;
 }
+
+/* ── Voucher, payment options, Stripe step ─────────────────────────────── */
+.voucherRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.secondaryBtn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #4338ca;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.secondaryBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.inlineError {
+    margin-top: 8px;
+    color: #b91c1c;
+    font-size: 0.85rem;
+}
+
+.paymentOption {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.paymentOption span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.paymentOption small {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.paymentOptionActive {
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.stripeBox {
+    margin-top: 8px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+/* Global input styles stretch radios to full width; keep them compact here */
+.paymentOption input[type="radio"] {
+    width: auto;
+    flex: 0 0 auto;
+    margin-top: 4px;
+    accent-color: #4f46e5;
+}
+
+.paymentOption svg {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: #4f46e5;
+}
+
+.paymentOption span {
+    flex: 1 1 auto;
+    text-align: left;
+}
