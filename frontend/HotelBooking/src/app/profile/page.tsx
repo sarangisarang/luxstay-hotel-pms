@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Mail, Shield, Lock, Eye, EyeOff, CheckCircle, Star, ClipboardList } from "lucide-react";
 import api from "@/components/lib/axiosConfig";
+import type { GuestBooking } from "@/components/lib/onlineBooking";
 import s from "@/styles/Profile.module.css";
 import { useTranslation } from "react-i18next";
 import "@/app/i18n";
@@ -58,12 +59,17 @@ export default function ProfilePage() {
                 setProfile(p);
                 // Fetch loyalty by email — 404 is expected if guest has no loyalty record
                 if (p.role === "USER") {
-                    api.get(`/api/loyalty/email/${encodeURIComponent(p.email)}`)
-                        .then(lr => setLoyalty(lr.data))
+                    // Own data only: the server scopes these to the logged-in account
+                    api.get("/api/user/loyalty")
+                        .then(lr => setLoyalty(lr.data && lr.data.tier ? lr.data : null))
                         .catch(() => {});
-                    // Fetch recent bookings for guests only
-                    api.get(`/api/public/bookings/my-bookings?email=${encodeURIComponent(p.email)}`)
-                        .then(br => setBookings(Array.isArray(br.data) ? br.data.slice(0, 5) : []))
+                    api.get<GuestBooking[]>("/api/user/bookings")
+                        .then(br => setBookings(Array.isArray(br.data)
+                            ? br.data.slice(0, 5).map(b => ({
+                                id: b.id, checkInDate: b.checkIn, checkOutDate: b.checkOut,
+                                bookingStatus: b.status, totalAmount: b.total, roomNumber: b.roomNumber ?? undefined,
+                              }))
+                            : []))
                         .catch(() => {});
                 }
             })
@@ -78,6 +84,9 @@ export default function ProfilePage() {
         setPwError(null); setPwSuccess(false);
         if (newPass !== confirm) { setPwError(t('passwordMismatch')); return; }
         if (newPass.length < 8)  { setPwError(t('passwordTooShort')); return; }
+        if (!/[A-Za-z]/.test(newPass) || !/[0-9]/.test(newPass)) {
+            setPwError(t("passwordNeedsLetterDigit", "Use at least one letter and one digit.")); return;
+        }
 
         setSaving(true);
         try {

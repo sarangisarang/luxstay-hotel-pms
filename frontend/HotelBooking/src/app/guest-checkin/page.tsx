@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import "@/app/i18n";
 
 type SubmitResult = { confirmationCode: string; status: string; id: string };
-type CheckInStatus = { id: string; bookingId: string; status: string; confirmationCode: string; submittedAt: string };
+type CheckInStatus = { id: string; status: string; confirmationCode: string; submittedAt: string };
 
 const INIT_FORM = {
     bookingId: "", guestFirstName: "", guestLastName: "", guestEmail: "", guestPhone: "",
@@ -37,6 +37,9 @@ export default function GuestCheckInPage() {
     const [submitting,    setSubmitting]    = useState(false);
     const [result,        setResult]        = useState<SubmitResult | null>(null);
     const [statusEmail,   setStatusEmail]   = useState("");
+    const [statusCode,    setStatusCode]    = useState("");
+    const [statusChecked, setStatusChecked] = useState(false);
+    const [submitError,   setSubmitError]   = useState<string | null>(null);
     const [statusList,    setStatusList]    = useState<CheckInStatus[]>([]);
     const [statusLoading, setStatusLoading] = useState(false);
 
@@ -48,21 +51,25 @@ export default function GuestCheckInPage() {
             return;
         }
         setSubmitting(true);
+        setSubmitError(null);
         try {
             const r = await api.post("/api/public/online-checkin", form);
             setResult(r.data);
-        } catch { alert("Submission failed. Please check your booking ID and try again."); }
+        } catch (e) {
+            setSubmitError((e as Error).message || "Submission failed. Please check your booking reference and e-mail.");
+        }
         finally { setSubmitting(false); }
     };
 
+    // Needs e-mail AND confirmation code: the e-mail alone no longer lists check-ins
     const lookupStatus = async () => {
-        if (!statusEmail) return;
+        if (!statusEmail || !statusCode) return;
         setStatusLoading(true);
         try {
-            const r = await api.get(`/api/public/online-checkin/status?email=${encodeURIComponent(statusEmail)}`);
+            const r = await api.get(`/api/public/online-checkin/status?email=${encodeURIComponent(statusEmail)}&code=${encodeURIComponent(statusCode.trim())}`);
             setStatusList(r.data);
-        } catch { alert("Status lookup failed."); }
-        finally { setStatusLoading(false); }
+        } catch { setStatusList([]); }
+        finally { setStatusLoading(false); setStatusChecked(true); }
     };
 
     return (
@@ -169,6 +176,7 @@ export default function GuestCheckInPage() {
                                     placeholder="Any other special requests or notes…"
                                 />
                             </div>
+                            {submitError && <div className={s.noResults}>{submitError}</div>}
                             <button type="button" className={s.submitBtn} onClick={submit} disabled={submitting}>
                                 {submitting ? t('submittingReview') : t('completeOnlineCheckIn')}
                             </button>
@@ -185,7 +193,7 @@ export default function GuestCheckInPage() {
                                 <div className={s.confirmationLabel}>{t('confirmationCode')}</div>
                                 <div className={s.confirmationCode}>{result.confirmationCode}</div>
                             </div>
-                            <p className={s.successHint}>Save this code. Check your status using your email below.</p>
+                            <p className={s.successHint}>{t("saveCheckInCode", "Save this code. You need it together with your e-mail to check the status.")}</p>
                             <button type="button" className={s.anotherBtn} onClick={() => { setResult(null); setForm(INIT_FORM); }}>
                                 {t('submitAnother')}
                             </button>
@@ -201,23 +209,30 @@ export default function GuestCheckInPage() {
                                     className={s.statusInput}
                                     value={statusEmail}
                                     onChange={e => setStatusEmail(e.target.value)}
-                                    placeholder="Enter your email address"
+                                    placeholder={t("enterEmail", "Your e-mail address")}
+                                    aria-label={t("emailAddress", "E-mail address")}
+                                />
+                                <input
+                                    className={s.statusInput}
+                                    value={statusCode}
+                                    onChange={e => setStatusCode(e.target.value)}
+                                    placeholder="OCI-XXXXXXXX"
+                                    aria-label={t("confirmationCode", "Confirmation code")}
                                     onKeyDown={e => { if (e.key === "Enter") lookupStatus(); }}
                                 />
                                 <button type="button" className={s.checkBtn} onClick={lookupStatus}
-                                    disabled={statusLoading || !statusEmail}>
-                                    {statusLoading ? "…" : "Check"}
+                                    disabled={statusLoading || !statusEmail || !statusCode}>
+                                    {statusLoading ? "…" : t("check", "Check")}
                                 </button>
                             </div>
-                            {statusList.length === 0 && statusEmail && !statusLoading && (
-                                <div className={s.noResults}>{t('noCheckInsForEmail', 'No check-ins found for this email.')}</div>
+                            {statusList.length === 0 && statusChecked && !statusLoading && (
+                                <div className={s.noResults}>{t('noCheckInForCode', 'No check-in found for this e-mail and code.')}</div>
                             )}
                             {statusList.map(item => {
                                 const meta = STATUS_META[item.status] ?? STATUS_META.SUBMITTED;
                                 return (
                                     <div key={item.id} className={`${s.statusCard} ${meta.cardCls}`}>
                                         <div>
-                                            <div className={s.statusBookingId}>Booking {item.bookingId?.substring(0, 8)}…</div>
                                             <div className={s.statusCode}>{item.confirmationCode}</div>
                                             {item.submittedAt && (
                                                 <div className={s.statusDate}>

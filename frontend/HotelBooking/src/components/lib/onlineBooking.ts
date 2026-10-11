@@ -18,6 +18,29 @@ export type BookingConfirmation = {
   bookingStatus: string;
   paymentStatus: string;
   paymentOption: string;
+  /** Hotel's check-in / check-out time, e.g. "15:00" (null when not configured). */
+  checkInTime?: string | null;
+  checkOutTime?: string | null;
+  /** Signed token that lets the booker view or cancel this one booking. */
+  manageToken?: string | null;
+};
+
+/** A booking as shown to the guest (account pages and manage link). */
+export type GuestBooking = {
+  id: string;
+  reference: string;
+  hotel: string;
+  roomNumber: number | null;
+  roomType: string | null;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  status: string;
+  paymentStatus: string;
+  total: number;
+  currency: string;
+  canCancel: boolean;
+  cancellationPolicy: string | null;
 };
 
 /** Formats an amount in the hotel's currency (falls back to "1.00 EUR" style). */
@@ -45,6 +68,9 @@ export function confirmationQuery(c: BookingConfirmation): string {
     bookingStatus: c.bookingStatus,
     paymentStatus: c.paymentStatus,
     paymentOption: c.paymentOption,
+    checkInTime: c.checkInTime ?? "",
+    checkOutTime: c.checkOutTime ?? "",
+    manageToken: c.manageToken ?? "",
   }).toString();
 }
 

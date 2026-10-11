@@ -60,20 +60,40 @@ public class SecurityConfig {
 
     /* ===================== Bean: Centralized CORS ===================== */
 
+    /**
+     * Only the configured frontend origins may call the API from a browser
+     * (ALLOWED_ORIGINS, comma separated). It used to be "*", which ignored
+     * the setting. Entries without a scheme (Render passes bare host names)
+     * are treated as https.
+     */
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(
+            @org.springframework.beans.factory.annotation.Value("${app.frontend.allowed-origins:http://localhost:3000}")
+            String allowedOrigins) {
         CorsConfiguration cfg = new CorsConfiguration();
-        // API uses JWT Bearer tokens (not cookies), so allowCredentials=false is safe.
-        // allowedOriginPatterns("*") permits any origin including tunnel URLs.
-        cfg.setAllowedOriginPatterns(List.of("*"));
+        cfg.setAllowedOriginPatterns(parseOrigins(allowedOrigins));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
+        // JWT travels in the Authorization header, not in cookies
         cfg.setAllowCredentials(false);
+        cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
+    }
+
+    /** "a.com, http://b.com:3000/" → ["https://a.com", "http://b.com:3000"] */
+    public static List<String> parseOrigins(String csv) {
+        if (csv == null || csv.isBlank()) return List.of();
+        return Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(o -> !o.isEmpty())
+                .map(o -> o.replaceAll("/+$", ""))
+                .map(o -> o.contains("://") ? o : "https://" + o)
+                .distinct()
+                .toList();
     }
 
     /* ===================== Security Filter Chain ===================== */
@@ -85,34 +105,51 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        /* ---------- Public endpoints ---------- */
+                        /* ---------- Public ---------- */
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/refresh",
+                                "/api/auth/logout",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password",
                                 "/api/public/**",
-                                "/api/vouchers/validate",
-                                "/api/rooms/availability",
                                 "/actuator/health",
                                 "/error",
+                                // SockJS handshake; every STOMP frame is authenticated
+                                // by WebSocketAuthInterceptor (JWT on CONNECT)
                                 "/ws/**",
+                                // only reachable when API_DOCS_ENABLED=true
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        /* AI endpoints — accessible to all authenticated roles */
-                        .requestMatchers("/api/ai/**").hasAnyRole("ADMIN", "RECEPTION", "USER")
-                        /* CRM, POS, Channels, Pricing — ADMIN and RECEPTION */
+                        .requestMatchers(HttpMethod.GET, "/api/vouchers/validate").permitAll()
+                        // Public images (room, room type, hotel pictures)
+                        .requestMatchers(HttpMethod.GET,
+                                "/uploads/**", "/roomtype/**",
+                                "/api/room-types/roomtype/**", "/api/images/files/**").permitAll()
+
+                        /* ---------- Any logged-in account (guest or staff) ---------- */
+                        // Guest accounts (USER) get ONLY these; everything else is staff
+                        // data. Endpoints below check ownership themselves.
+                        .requestMatchers("/api/auth/me").authenticated()
+                        .requestMatchers("/api/user/me", "/api/user/change-password").authenticated()
+                        .requestMatchers("/api/user/**").hasRole("USER")
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/chat/*/messages").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/feedback-reviews").authenticated()
+
+                        /* ---------- Staff only from here on ---------- */
+                        .requestMatchers("/api/ai/**").hasAnyRole("ADMIN", "RECEPTION")
+                        .requestMatchers("/api/chat/**").hasAnyRole("ADMIN", "RECEPTION")
                         .requestMatchers("/api/crm/**").hasAnyRole("ADMIN", "RECEPTION")
                         .requestMatchers("/api/pos/**").hasAnyRole("ADMIN", "RECEPTION")
                         .requestMatchers("/api/channels/**").hasAnyRole("ADMIN", "RECEPTION")
                         .requestMatchers("/api/pricing-rules/**").hasAnyRole("ADMIN", "RECEPTION")
                         .requestMatchers(HttpMethod.GET, "/api/checkins/**").hasAnyRole("ADMIN", "RECEPTION")
                         .requestMatchers(HttpMethod.PATCH, "/api/checkins/**").hasAnyRole("ADMIN", "RECEPTION")
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
-
-
-                        /* ---------- Static GET (public) ---------- */
-                        .requestMatchers(HttpMethod.GET, "/uploads/**", "/roomtype/**").permitAll()
 
                         /* ---------- Namespaces ---------- */
                         // RECEPTION can read operational stats and reporting endpoints
@@ -139,10 +176,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/concierge/**").hasRole("ADMIN")
                         .requestMatchers("/api/chain/**").hasAnyRole("ADMIN")
                         .requestMatchers("/api/reception/**").hasRole("RECEPTION")
-                        // Profile endpoints must be accessible to all authenticated roles
-                        .requestMatchers("/api/user/me", "/api/user/change-password")
-                            .hasAnyRole("ADMIN", "RECEPTION", "USER")
-                        .requestMatchers("/api/user/**").hasRole("USER")
 
                         /* ---------- ADMIN-only sensitive endpoints ---------- */
                         // Audit trail and webhook config must never be visible to non-admins
@@ -151,21 +184,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/ai-audit/**").hasRole("ADMIN")
                         .requestMatchers("/api/ai-health/**").hasRole("ADMIN")
 
-                        /* ---------- Sensitive list-all endpoints: ADMIN + RECEPTION only ---------- */
-                        // A USER role must never enumerate all records — data breach risk
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/invoices",
-                                "/api/invoices/number/*",
-                                "/api/payments",
-                                "/api/bookings",
-                                "/api/guests",
-                                "/api/employees",
-                                "/api/staff/**"
-                        ).hasAnyRole("ADMIN", "RECEPTION")
-
-                        /* ---------- READ access (generic) ---------- */
+                        /* ---------- READ access: staff only ---------- */
+                        // Was ADMIN/RECEPTION/USER: any registered guest could read other
+                        // guests' profiles, DSGVO exports, allergies, all voucher codes,
+                        // housekeeping/maintenance data and revenue insights.
                         .requestMatchers(HttpMethod.GET, "/api/**")
-                        .hasAnyRole("ADMIN", "RECEPTION", "USER")
+                        .hasAnyRole("ADMIN", "RECEPTION")
 
                         /* ---------- RECEPTION core operations ---------- */
                         // Bookings — RECEPTION can create, update, and action
@@ -196,10 +220,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/servicerequests/**")
                         .hasAnyRole("ADMIN", "RECEPTION")
 
-                        // Feedback / Reviews — all authenticated roles can submit
-                        .requestMatchers(HttpMethod.POST, "/api/feedback-reviews/**")
-                        .hasAnyRole("USER", "ADMIN", "RECEPTION")
-
                         // Groups and Preferences — RECEPTION full write
                         .requestMatchers(HttpMethod.POST, "/api/groups/**")
                         .hasAnyRole("ADMIN", "RECEPTION")
@@ -225,13 +245,6 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "RECEPTION")
                         .requestMatchers(HttpMethod.PATCH, "/api/rate-plans/**", "/api/loyalty/**")
                         .hasAnyRole("ADMIN", "RECEPTION")
-
-                        // Chat
-                        .requestMatchers(HttpMethod.POST, "/api/chat/**").hasAnyRole("USER", "ADMIN", "RECEPTION")
-                        .requestMatchers(HttpMethod.GET, "/api/chat/**").hasAnyRole("ADMIN", "RECEPTION", "USER")
-
-                        // Notifications — all authenticated roles
-                        .requestMatchers("/api/notifications/**").hasAnyRole("ADMIN", "RECEPTION", "USER")
 
                         /* ---------- GENERIC WRITE rules (ADMIN only for everything else) ---------- */
                         .requestMatchers(HttpMethod.POST,   "/api/**").hasRole("ADMIN")

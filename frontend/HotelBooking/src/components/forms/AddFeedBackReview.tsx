@@ -20,6 +20,7 @@ type Booking = {
   checkInDate?: string; checkOutDate?: string; bookingStatus?: string;
 };
 type RoomDTO  = { id: string; roomNumber?: number; hotelName?: string; hotelId?: string };
+type GuestBookingView = { id: string; hotel: string; roomNumber: number | null; checkIn: string; checkOut: string; status: string };
 
 interface StayOption {
   bookingId: string;
@@ -81,10 +82,10 @@ export default function AddFeedbackReview() {
   const { t } = useTranslation();
   const router = useRouter();
 
-  // Role detection
-  const [userRole] = useState<string>(() =>
-    typeof window !== "undefined" ? (localStorage.getItem("role") ?? "ADMIN") : "ADMIN"
-  );
+  // Role detection after mount: reading localStorage during render made the
+  // server HTML (no storage) differ from the browser's (hydration error #418).
+  const [userRole, setUserRole] = useState<string | null>(null);
+  useEffect(() => { setUserRole(localStorage.getItem("role") ?? "ADMIN"); }, []);
   const isUser = userRole === "USER";
 
   /* ── STATE ── */
@@ -120,60 +121,49 @@ export default function AddFeedbackReview() {
 
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  /* ── LOAD GUESTS ── */
+  /* ── LOAD GUESTS (staff only: guest accounts cannot list other guests) ── */
   useEffect(() => {
     let alive = true;
+    if (userRole === null) return;
+    if (isUser) { setGuestsLoading(false); return; }
     api.get("/api/guests", { params: { size: 500 } })
       .then(r => { if (alive) setGuests(normalizeList(r.data) as Guest[]); })
       .catch(e => { if (alive) setGuestsError(e?.message ?? "Failed to load guests."); })
       .finally(() => { if (alive) setGuestsLoading(false); });
     return () => { alive = false; };
-  }, []);
+  }, [isUser, userRole]);
 
-  /* ── AUTO-DETECT LOGGED-IN USER → find guest by email ── */
+  /* ── GUEST ACCOUNT: own profile and own stays (server-side scoped) ── */
   useEffect(() => {
-    if (!isUser || guests.length === 0) return;
-    const email = typeof window !== "undefined" ? localStorage.getItem("email") ?? "" : "";
-    if (!email) return;
-
-    const found = guests.find(g => (g.email ?? "").toLowerCase() === email.toLowerCase());
-    if (!found) return;
-
-    setMyGuest(found);
-    setGuestId(found.id);
-
-    // Load their bookings
+    if (!isUser) return;
+    let alive = true;
     setStaysLoading(true);
-    api.get("/api/bookings")
-      .then(async res => {
-        const all = normalizeList(res.data) as Booking[];
-        const mine = all.filter(b => String(b.guestId) === String(found.id));
-        mine.sort((a, b) =>
-          new Date(b.checkInDate ?? "").getTime() - new Date(a.checkInDate ?? "").getTime()
-        );
-
-        // Resolve room → hotelName for each booking
-        const stays: StayOption[] = [];
-        await Promise.all(mine.map(async b => {
-          try {
-            const rRes = await api.get<RoomDTO>(`/api/rooms/${b.roomId}`);
-            stays.push({
-              bookingId: b.id,
-              hotelName: rRes.data?.hotelName ?? "Unknown Hotel",
-              roomNumber: rRes.data?.roomNumber != null ? String(rRes.data.roomNumber) : "—",
-              checkIn: fmtDate(b.checkInDate),
-              checkOut: fmtDate(b.checkOutDate),
-            });
-          } catch { /* skip */ }
-        }));
-
-        stays.sort((a, b) => a.hotelName.localeCompare(b.hotelName));
+    Promise.all([
+      api.get<{ email: string; guestId?: string | null }>("/api/auth/me"),
+      api.get<GuestBookingView[]>("/api/user/bookings"),
+    ])
+      .then(([me, bookings]) => {
+        if (!alive) return;
+        if (me.data?.guestId) {
+          setMyGuest({ id: me.data.guestId, email: me.data.email });
+          setGuestId(me.data.guestId);
+        }
+        const stays: StayOption[] = (Array.isArray(bookings.data) ? bookings.data : [])
+          .filter(b => b.status !== "CANCELLED")
+          .map(b => ({
+            bookingId: b.id,
+            hotelName: b.hotel || "Hotel",
+            roomNumber: b.roomNumber != null ? String(b.roomNumber) : "—",
+            checkIn: fmtDate(b.checkIn),
+            checkOut: fmtDate(b.checkOut),
+          }));
         setMyStays(stays);
         if (stays.length > 0) setSelectedStay(stays[0]);
       })
       .catch(() => {})
-      .finally(() => setStaysLoading(false));
-  }, [isUser, guests]);
+      .finally(() => { if (alive) setStaysLoading(false); });
+    return () => { alive = false; };
+  }, [isUser]);
 
   /* ── ADMIN/RECEPTION: load stay info when guest selected ── */
   const filteredGuests = useMemo(() => {
@@ -232,13 +222,17 @@ export default function AddFeedbackReview() {
         rating: clampRating(rating),
       });
       setSuccess(true);
-      setTimeout(() => router.push("/feedback"), 1400);
+      setTimeout(() => router.push(isUser ? "/profile" : "/feedback"), 1400);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } }; message?: string };
       setError(e?.response?.data?.message ?? e?.message ?? "Failed to submit review.");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (userRole === null) {
+    return <div className="fade-in form-page" />;
   }
 
   return (
@@ -248,7 +242,7 @@ export default function AddFeedbackReview() {
           <h1 className="page-title">{t('addReview')}</h1>
           <p className="page-subtitle">{t('addReviewSubtitle')}</p>
         </div>
-        <Link href="/feedback" className="btn btn-secondary">
+        <Link href={isUser ? "/profile" : "/feedback"} className="btn btn-secondary">
           <ArrowLeft size={14} /> {t('back')}
         </Link>
       </div>
@@ -275,7 +269,7 @@ export default function AddFeedbackReview() {
               {/* Auto-detected guest card */}
               <div className="form-field">
                 <label className="form-label">{t('yourProfile')}</label>
-                {guestsLoading ? (
+                {staysLoading ? (
                   <p style={{ fontSize: ".85rem", color: "#64748b" }}>{t('loadingProfile', 'Loading your profile…')}</p>
                 ) : myGuest ? (
                   <div className={styles.guestCard}>

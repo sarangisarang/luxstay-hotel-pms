@@ -8,9 +8,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,11 +21,12 @@ public class RoomController {
     private final RoomMapper roomMapper;
     private final RoomRepository roomRepository;
     private final BookingService bookingService;
+    private final com.booksys.upload.ImageUploadService imageUploadService;
 
     @Value("${app.server.url:http://localhost:8080}")
     private String serverUrl;
 
-    @PreAuthorize("hasAnyRole('ADMIN','RECEPTION','USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/save")
     public ResponseEntity<RoomDTO> save(@RequestBody RoomDTO roomDTO) {
         Room room = roomMapper.toEntity(roomDTO);
@@ -52,12 +50,9 @@ public class RoomController {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("Room not found: " + roomId));
 
-        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path uploadPath = Paths.get("uploads/");
-        if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
-        Files.write(uploadPath.resolve(filename), file.getBytes());
-
-        String imageUrl = serverUrl + "/uploads/" + filename;
+        // Validated image, random file name (the client's name is never used on disk)
+        String filename = imageUploadService.store(file, "");
+        String imageUrl = serverUrl.replaceAll("/+$", "") + "/uploads/" + filename;
         room.setImageUrl(imageUrl);
         roomRepository.save(room);
 

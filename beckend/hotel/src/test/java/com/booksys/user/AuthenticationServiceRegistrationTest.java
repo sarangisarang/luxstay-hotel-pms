@@ -64,7 +64,7 @@ class AuthenticationServiceRegistrationTest {
 
     @Test
     void selfRegisterAsAdminIsRejectedAndNoUserCreated() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.existsByEmailIgnoreCase(anyString())).thenReturn(false);
 
         assertThatThrownBy(() -> service.register(req(Role.ADMIN)))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -75,7 +75,7 @@ class AuthenticationServiceRegistrationTest {
 
     @Test
     void selfRegisterAsReceptionIsRejectedAndNoUserCreated() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.existsByEmailIgnoreCase(anyString())).thenReturn(false);
 
         assertThatThrownBy(() -> service.register(req(Role.RECEPTION)))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -85,7 +85,7 @@ class AuthenticationServiceRegistrationTest {
 
     @Test
     void selfRegisterAsUserSucceedsWithUserRole() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.existsByEmailIgnoreCase(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("hashed");
         when(guestService.createGuest(any())).thenReturn(mock(Guest.class));
         when(jwtService.generateToken(any())).thenReturn("jwt-token");
@@ -101,7 +101,7 @@ class AuthenticationServiceRegistrationTest {
 
     @Test
     void nullRoleDefaultsToUser() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.existsByEmailIgnoreCase(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("hashed");
         when(guestService.createGuest(any())).thenReturn(mock(Guest.class));
         when(jwtService.generateToken(any())).thenReturn("jwt-token");
@@ -109,5 +109,36 @@ class AuthenticationServiceRegistrationTest {
         AuthResponse resp = service.register(req(null));
 
         assertThat(resp.getRole()).isEqualTo("USER");
+    }
+
+    @Test
+    void invalidEmailWeakPasswordAndMissingNameAreRejected() {
+        RegisterRequest badEmail = req(null);
+        badEmail.setEmail("not-an-email");
+        assertThatThrownBy(() -> service.register(badEmail)).isInstanceOf(IllegalArgumentException.class);
+
+        RegisterRequest weak = req(null);
+        weak.setPassword("1");
+        assertThatThrownBy(() -> service.register(weak))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("at least");
+
+        RegisterRequest noName = req(null);
+        noName.setLastName(" ");
+        assertThatThrownBy(() -> service.register(noName)).isInstanceOf(IllegalArgumentException.class);
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void emailIsNormalisedAndCaseVariantsCountAsTaken() {
+        when(userRepository.existsByEmailIgnoreCase("attacker@example.com")).thenReturn(true);
+        RegisterRequest shouting = req(null);
+        shouting.setEmail("  Attacker@Example.COM ");
+
+        assertThatThrownBy(() -> service.register(shouting))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("This email address is already registered");
+        verify(userRepository, never()).save(any());
     }
 }

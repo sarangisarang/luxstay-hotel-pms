@@ -1,8 +1,4 @@
 package com.booksys.guest;
-import com.booksys.booking.Booking;
-import com.booksys.booking.BookingRepository;
-import com.booksys.loyalty.GuestLoyalty;
-import com.booksys.loyalty.GuestLoyaltyRepository;
 import lombok.RequiredArgsConstructor;
 import com.booksys.common.PageResponse;
 import org.springframework.data.domain.PageRequest;
@@ -10,9 +6,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,8 +19,7 @@ import java.util.UUID;
 public class GuestController {
 
  private final GuestService guestService;
- private final BookingRepository bookingRepository;
- private final GuestLoyaltyRepository loyaltyRepository;
+ private final GuestDataExportService dataExportService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GuestDTO> createGuest(@RequestBody GuestDTO guestDTO) {
@@ -58,39 +50,12 @@ public class GuestController {
         guestService.deleteGuest(id); return ResponseEntity.noContent().build(); }
 
     /**
-     * GDPR Data Export — returns a complete data package for a guest: profile,
-     * booking history, and loyalty data. ADMIN/RECEPTION only.
+     * DSGVO data export (Art. 15/20) of one guest: profile, stays, payments,
+     * loyalty, preferences, online check-ins, reviews and communication.
+     * Staff only; guests download their own data via /api/user/data-export.
      */
     @GetMapping("/{id}/data-export")
     public ResponseEntity<Map<String, Object>> gdprExport(@PathVariable UUID id) {
-        GuestDTO guest = guestService.getGuestById(id);
-        List<Booking> bookings = bookingRepository.findByGuestId(id); // targeted query, no full scan
-        GuestLoyalty loyalty = loyaltyRepository.findByGuestId(id).orElse(null);
-
-        List<Map<String, Object>> bookingData = bookings.stream().map(b -> {
-            Map<String, Object> m = new LinkedHashMap<>();
-            m.put("id", b.getId());
-            m.put("checkIn", b.getCheckInDate());
-            m.put("checkOut", b.getCheckOutDate());
-            m.put("status", b.getBookingStatus());
-            m.put("totalAmount", b.getTotalAmount());
-            m.put("roomNumber", b.getRoomNumber());
-            return m;
-        }).toList();
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("exportedAt", LocalDateTime.now().toString());
-        result.put("guest", guest);
-        result.put("bookings", bookingData);
-        result.put("bookingCount", bookings.size());
-        if (loyalty != null) {
-            Map<String, Object> loyaltyData = new LinkedHashMap<>();
-            loyaltyData.put("points", loyalty.getPoints());
-            loyaltyData.put("tier", loyalty.getTier());
-            loyaltyData.put("totalStays", loyalty.getTotalStays());
-            loyaltyData.put("totalSpent", loyalty.getTotalSpent());
-            result.put("loyalty", loyaltyData);
-        }
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(dataExportService.export(id));
     }
 }

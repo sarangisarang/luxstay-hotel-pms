@@ -5,7 +5,7 @@ const ADMIN_ONLY = [
     "/add-hotel", "/add-room", "/add-room-type", "/add-service",
     "/add-employees", "/employees", "/invoices",
     "/rate-plans", "/pricing-rules", "/campaigns",
-    "/ai-audit", "/ai-knowledge", "/ai-monitor",
+    "/ai-audit", "/ai-knowledge", "/ai-monitor", "/ai-eval",
     "/reports", "/kpi", "/pace-report", "/image-upload", "/admin",
     "/chain", "/webhooks", "/staff", "/audit-log", "/pricing-calendar", "/reconciliation",
     "/revenue-optimizer", "/guest-analytics", "/hotel-settings", "/vouchers",
@@ -23,6 +23,8 @@ const STAFF_ONLY = [
     "/concierge",
     "/pos", "/channel-manager", "/checkins", "/guest-checkin",
     "/search-filter", "/dashboard", "/add-booking", "/operations",
+    // Staff tools that read hotel-wide data (the API refuses guest accounts anyway)
+    "/ai-assistant", "/feedback",
 ];
 
 /** Decode role from JWT payload without verifying the signature. */
@@ -51,7 +53,9 @@ export function middleware(req: NextRequest) {
     if (
         pathname.startsWith("/login") ||
         pathname.startsWith("/register") ||
-        pathname.startsWith("/book") ||
+        // exact public booking pages only: startsWith("/book") also matched
+        // "/bookings" and "/booking-trends", which skipped the role checks
+        pathname === "/book" || pathname.startsWith("/book/") ||
         pathname.startsWith("/_next") ||
         pathname.startsWith("/api") ||
         pathname === "/"

@@ -47,12 +47,16 @@ public class NotificationController {
         return Map.of("count", count);
     }
 
+    /** Marks one notification read — only one addressed to the caller's role. */
     @PatchMapping("/{id}/read")
-    public ResponseEntity<Void> markRead(@PathVariable UUID id) {
-        repo.findById(id).ifPresent(n -> {
-            n.setRead(true);
-            repo.save(n);
-        });
+    public ResponseEntity<Void> markRead(@PathVariable UUID id, Authentication auth) {
+        String role = resolveRole(auth);
+        repo.findById(id)
+                .filter(n -> n.getRecipientRole() == null || n.getRecipientRole().equals(role))
+                .ifPresent(n -> {
+                    n.setRead(true);
+                    repo.save(n);
+                });
         return ResponseEntity.noContent().build();
     }
 

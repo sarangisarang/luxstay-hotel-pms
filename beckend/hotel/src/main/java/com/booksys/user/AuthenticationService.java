@@ -34,6 +34,15 @@ public class AuthenticationService {
     private final TokenService tokenService;
     private final HotelRepository hotelRepository;
     private final StaffRepository staffRepository;
+    private final LoginAttemptService loginAttemptService;
+    private final UserService userService;
+
+    /** When true, a new login ends all other sessions of the account. */
+    @org.springframework.beans.factory.annotation.Value("${app.auth.single-session:false}")
+    private boolean singleSession;
+
+    private static final java.util.regex.Pattern EMAIL =
+            java.util.regex.Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     /**
      * Registers a new user in the system with a selected role
@@ -53,10 +62,22 @@ public class AuthenticationService {
      */
     public AuthResponse register(RegisterRequest request) {
 
-        // 0. Reject duplicate emails immediately
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already registered: " + request.getEmail());
+        // 0. Validate and normalise. Registration used to accept "not-an-email"
+        //    with password "1", and "Anna@x.de" / "anna@x.de" as two accounts.
+        String email = request.getEmail() == null ? "" : request.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
+        if (email.isEmpty() || email.length() > 254 || !EMAIL.matcher(email).matches()) {
+            throw new IllegalArgumentException("A valid email address is required");
         }
+        if (request.getFirstName() == null || request.getFirstName().isBlank()
+                || request.getLastName() == null || request.getLastName().isBlank()) {
+            throw new IllegalArgumentException("First and last name are required");
+        }
+        PasswordPolicy.validate(request.getPassword());
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            // Same message for every taken address; it does not echo the input back
+            throw new IllegalArgumentException("This email address is already registered");
+        }
+        request.setEmail(email);
 
         // 1. Resolve role — SECURITY: public self-registration may ONLY create a
         //    regular USER (guest) account. Privileged roles (ADMIN, RECEPTION) must be
@@ -123,8 +144,9 @@ public class AuthenticationService {
             user.setGuest(guest);
         }
 
-        // 7. Generate token
+        // 7. Generate and persist the token (so logout can revoke it)
         String jwtToken = jwtService.generateToken(user);
+        tokenService.saveUserToken(user, jwtToken);
 
         return AuthResponse.builder()
                 .token(jwtToken)
@@ -135,44 +157,57 @@ public class AuthenticationService {
 
 
 
-    // Method for refreshing JWT token
+    /**
+     * Exchanges a still-valid token for a new one. A revoked token (logout,
+     * password change) cannot be refreshed, and the old token is revoked, so a
+     * stolen token cannot be kept alive forever by refreshing it.
+     */
     public TokenRefreshResponse refreshToken(String oldToken) {
         if (oldToken == null || oldToken.isEmpty()) {
             throw new IllegalArgumentException("Token is missing");
         }
-
-        // Extract username from the old token
-        String username = jwtService.extractUsername(oldToken);
-        if (username == null) {
-            throw new IllegalArgumentException("Invalid token");
+        if (tokenService.isRevoked(oldToken)) {
+            throw new IllegalArgumentException("Token has been revoked");
         }
 
-        // Check if token is expired
-        if (jwtService.isTokenExpired(oldToken)) {
+        String username;
+        try {
+            username = jwtService.extractUsername(oldToken);   // also verifies signature, issuer, audience
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid token");
+        }
+        if (username == null || jwtService.isTokenExpired(oldToken)) {
             throw new IllegalArgumentException("Token expired");
         }
 
-        // Find the user in the database
-        var user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // Generate a new token for the same user
+        AppUser user = userService.findByEmail(username);
         String newToken = jwtService.generateToken(user);
-
-        // Return new token response
+        tokenService.saveUserToken(user, newToken);
+        tokenService.revokeToken(oldToken);
         return new TokenRefreshResponse(newToken);
     }
 
 
 
     public AuthResponse authenticate(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-        AppUser user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String email = request.getEmail() == null ? "" : request.getEmail().trim();
+        if (loginAttemptService.isBlocked(email)) {
+            throw new TooManyLoginAttemptsException();
+        }
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, request.getPassword()));
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            loginAttemptService.loginFailed(email);
+            throw e;   // mapped to HTTP 401 by the exception handler
+        }
+        loginAttemptService.loginSucceeded(email);
+
+        AppUser user = userService.findByEmail(email);
         String jwt = jwtService.generateToken(user);
-        tokenService.revokeAllUserTokens(user);
+        if (singleSession) {
+            tokenService.revokeAllUserTokens(user);
+        }
         tokenService.saveUserToken(user, jwt);
 
         return new AuthResponse(jwt, user.getEmail(), user.getRole().name());

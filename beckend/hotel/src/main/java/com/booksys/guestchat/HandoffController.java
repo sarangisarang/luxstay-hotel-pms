@@ -26,15 +26,18 @@ public class HandoffController {
 
     @PostMapping("/handoff")
     public Map<String, Object> requestHandoff(@RequestBody HandoffRequest req) {
-        String sessionId  = req.sessionId() != null ? req.sessionId() : "unknown";
-        String guestName  = req.guestName() != null ? req.guestName() : "Guest";
-        String guestEmail = req.guestEmail();
-        String reason     = req.reason() != null ? req.reason() : "Guest requested live support";
+        // Everything here comes from an anonymous visitor: bound the length and
+        // HTML-escape it, so the e-mail to reception cannot carry injected
+        // links or markup.
+        String sessionId  = req.sessionId() != null ? clip(req.sessionId(), 64) : "unknown";
+        String guestName  = esc(req.guestName() != null ? clip(req.guestName(), 100) : "Guest");
+        String guestEmail = esc(clip(req.guestEmail(), 254));
+        String reason     = esc(req.reason() != null ? clip(req.reason(), 500) : "Guest requested live support");
 
         // Pull last 10 messages from this session for context
         List<ChatMemory> history = memoryRepo.findLastN(sessionId, 10);
         String transcript = history.stream()
-                .map(m -> "[" + m.getRole().toUpperCase() + "] " + m.getContent())
+                .map(m -> "[" + esc(m.getRole().toUpperCase()) + "] " + esc(m.getContent()))
                 .collect(Collectors.joining("\n"));
 
         // Notify reception by email (async, won't fail the request)
@@ -47,6 +50,16 @@ public class HandoffController {
                 "status", "requested",
                 "message", "Your request has been sent to our reception team. They will reach out to you shortly!"
         );
+    }
+
+    private static String esc(String s) {
+        return s == null ? "" : org.springframework.web.util.HtmlUtils.htmlEscape(s);
+    }
+
+    private static String clip(String s, int max) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.length() > max ? t.substring(0, max) : t;
     }
 
     private String buildHandoffEmail(String name, String email, String reason, String transcript) {

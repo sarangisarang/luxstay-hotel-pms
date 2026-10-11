@@ -8,6 +8,8 @@ import java.util.UUID;
 public interface OnlineCheckInRepository extends JpaRepository<OnlineCheckIn, UUID> {
     List<OnlineCheckIn> findByGuestEmail(String email);
     Optional<OnlineCheckIn> findByBookingId(UUID bookingId);
+    List<OnlineCheckIn> findByBookingIdIn(java.util.Collection<UUID> bookingIds);
+    Optional<OnlineCheckIn> findFirstByBookingIdOrderBySubmittedAtDesc(UUID bookingId);
     List<OnlineCheckIn> findByStatus(CheckInStatus status);
     Optional<OnlineCheckIn> findByConfirmationCode(String code);
     long countByStatus(CheckInStatus status);

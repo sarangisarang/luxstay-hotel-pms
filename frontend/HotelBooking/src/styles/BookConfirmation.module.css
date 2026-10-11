@@ -157,3 +157,6 @@
     justify-content: center;
     gap: 8px;
 }
+
+.manageHint { margin: 10px 0 0; font-size: .8rem; color: #4338ca; line-height: 1.6; }
+.manageHint a { color: #4f46e5; font-weight: 700; text-decoration: underline; }

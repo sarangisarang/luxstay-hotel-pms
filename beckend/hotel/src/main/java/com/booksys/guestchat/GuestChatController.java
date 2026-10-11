@@ -75,13 +75,23 @@ public class GuestChatController {
     // Main endpoint
     // =====================================================================
 
+    private static final int MAX_MESSAGE_LENGTH = 1000;
+    private static final java.util.regex.Pattern SESSION_ID = java.util.regex.Pattern.compile("^[A-Za-z0-9_-]{1,64}$");
+    private static final java.util.regex.Pattern LANGUAGE = java.util.regex.Pattern.compile("^[a-zA-Z]{2,3}(-[A-Za-z]{2,4})?$");
+
     @PostMapping("/guest-chat")
     public Map<String, Object> chat(@RequestBody GuestChatRequest req) {
+        // Public endpoint: bound every input (cost and storage abuse); see also RateLimitFilter
         String message   = req.message() != null ? req.message().trim() : "";
-        String sessionId = req.sessionId() != null ? req.sessionId() : "anon-" + UUID.randomUUID();
-        String lang      = (req.language() != null && !req.language().isBlank()) ? req.language() : "en";
+        String sessionId = req.sessionId() != null && SESSION_ID.matcher(req.sessionId()).matches()
+                ? req.sessionId() : "anon-" + UUID.randomUUID();
+        String lang      = req.language() != null && LANGUAGE.matcher(req.language()).matches() ? req.language() : "en";
 
         if (message.isBlank()) return Map.of("reply", "How can I help you today?");
+        if (message.length() > MAX_MESSAGE_LENGTH) {
+            return Map.of("reply", "Your message is too long. Please keep it under "
+                    + MAX_MESSAGE_LENGTH + " characters.");
+        }
 
         long startMs = System.currentTimeMillis();
 

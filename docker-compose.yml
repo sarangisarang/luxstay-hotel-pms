@@ -48,6 +48,9 @@ services:
       MAIL_USER:              ${MAIL_USER}
       MAIL_PASS:              ${MAIL_PASS}
       MAIL_FROM:              ${MAIL_FROM:-noreply@luxstay.com}
+      # Website origin(s) allowed to call the API, and the URL used in e-mailed links
+      ALLOWED_ORIGINS:        ${ALLOWED_ORIGINS:-http://localhost:3000}
+      FRONTEND_URL:           ${FRONTEND_URL:-http://localhost:3000}
     volumes:
       - uploads_data:/app/uploads
     ports:

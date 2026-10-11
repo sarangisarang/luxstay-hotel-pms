@@ -6,5 +6,13 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<AppUser, UUID> {
     Optional<AppUser> findByEmail(String email);
 
+    /**
+     * Case-insensitive lookup. Older data may contain the same address in two
+     * spellings (registration did not normalise case), so the first match wins.
+     */
+    Optional<AppUser> findFirstByEmailIgnoreCaseOrderByEmailAsc(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
+
     boolean existsByRole(Role role);
 }

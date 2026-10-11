@@ -47,6 +47,22 @@ public class TokenService {
     }
 
     /**
+     * Ends every other session of the user (e.g. after a password change),
+     * keeping the token of the current request valid.
+     */
+    public void revokeAllUserTokensExcept(AppUser user, String keepJwt) {
+        List<Token> others = getValidTokens(user).stream()
+                .filter(t -> keepJwt == null || !keepJwt.equals(t.getToken()))
+                .toList();
+        if (others.isEmpty()) return;
+        others.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(others);
+    }
+
+    /**
      * Persists a new JWT token record associated with the given user.
      * The token is initially valid (not expired, not revoked).
      *
@@ -59,6 +75,11 @@ public class TokenService {
             token.setExpired(true);
             tokenRepository.save(token);
         });
+    }
+
+    /** @return {@code true} if the token was revoked (logout, password change) or marked expired */
+    public boolean isRevoked(String jwt) {
+        return tokenRepository.existsByTokenAndRevokedTrue(jwt) || tokenRepository.existsByTokenAndExpiredTrue(jwt);
     }
 
     public void saveUserToken(AppUser user, String jwt) {
