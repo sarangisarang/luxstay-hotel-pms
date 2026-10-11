@@ -7,6 +7,18 @@
 *.p12
 *.jks
 
+# Local AI-assistant / tool settings. They can hold API keys and
+# permission overrides, so they stay on the developer's machine.
+.claude/
+
+# ── Database dumps — never commit these ───────────────────────────────────────
+# A dump contains guest personal data (names, emails, passport numbers) and
+# password hashes. scripts/backup.sh writes outside the repository by default.
+backups/
+*.sql.gz
+*.dump
+*.backup
+
 # ── Build artifacts ───────────────────────────────────────────────────────────
 target/
 *.jar
