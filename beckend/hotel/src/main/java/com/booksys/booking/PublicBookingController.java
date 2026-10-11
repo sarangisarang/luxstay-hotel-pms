@@ -1,20 +1,13 @@
 package com.booksys.booking;
 
-import com.booksys.email.BookingEmailData;
-import com.booksys.email.EmailService;
-import com.booksys.guest.Guest;
 import com.booksys.guest.GuestRepository;
 import com.booksys.hotel.Hotel;
 import com.booksys.hotel.HotelRepository;
-import com.booksys.payment.Payment;
-import com.booksys.payment.PaymentRepository;
-import com.booksys.payment.PaymentStatus;
 import com.booksys.room.Room;
 import com.booksys.room.RoomRepository;
 import com.booksys.room.RoomStatus;
 import com.booksys.service.ServiceRepository;
-import com.booksys.stripe.StripeService;
-import com.stripe.model.PaymentIntent;
+import com.booksys.pricing.BookingQuote;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,24 +16,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Public (no-auth) booking endpoint used by the guest-facing online booking page.
+ * Public (no-auth) booking API used by the guest-facing booking pages.
  *
  * Flow:
- *   1. Frontend creates a PaymentIntent via /api/public/stripe/create-payment-intent
- *   2. Guest pays with Stripe Elements (card collected on frontend)
- *   3. On Stripe success, frontend calls POST /api/public/bookings with the paymentIntentId
- *   4. This controller verifies the PaymentIntent is "succeeded", creates the booking,
- *      and sends a confirmation email.
+ *   1. GET  /options              → which payment options are enabled
+ *   2. POST /quote                → server-side price (dynamic pricing, services, voucher)
+ *   3a. POST /pay-at-hotel        → confirmed booking, payment PENDING until paid at the hotel
+ *   3b. POST /api/public/stripe/create-payment-intent → room held, Stripe PaymentIntent created
+ *       → guest pays with the Stripe Payment Element (card data never reaches this server)
+ *       → POST /confirm-payment (and the Stripe webhook) verify the payment and confirm the booking
  */
 @Slf4j
 @RestController
@@ -51,11 +41,9 @@ public class PublicBookingController {
     private final BookingRepository    bookingRepository;
     private final RoomRepository       roomRepository;
     private final GuestRepository      guestRepository;
-    private final PaymentRepository    paymentRepository;
     private final HotelRepository      hotelRepository;
     private final ServiceRepository    serviceRepository;
-    private final StripeService        stripeService;
-    private final EmailService         emailService;
+    private final OnlineBookingService onlineBookingService;
 
     /**
      * Returns distinct countries and cities for the booking page location dropdowns.
@@ -132,124 +120,6 @@ public class PublicBookingController {
     }
 
     /**
-     * Confirms a booking after successful Stripe payment.
-     * Verifies the PaymentIntent status with Stripe before persisting.
-     */
-    @PostMapping
-    @Transactional
-    public ResponseEntity<?> confirmBooking(@RequestBody PublicBookingRequest req) {
-
-        // 1. Validate dates
-        if (req.checkIn() == null || req.checkOut() == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Check-in and check-out are required"));
-        }
-        if (!req.checkOut().isAfter(req.checkIn())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Check-out must be after check-in"));
-        }
-
-        // 2. Verify Stripe payment succeeded
-        try {
-            PaymentIntent intent = stripeService.retrieve(req.paymentIntentId());
-            if (!"succeeded".equals(intent.getStatus())) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "Payment not completed. Status: " + intent.getStatus()));
-            }
-        } catch (Exception e) {
-            log.error("Stripe verification failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("error", "Payment verification failed"));
-        }
-
-        // 3. Load room
-        Room room = roomRepository.findById(req.roomId())
-                .orElseThrow(() -> new EntityNotFoundException("Room not found: " + req.roomId()));
-
-        // 4. Double-check availability (race condition guard)
-        boolean conflict = !bookingRepository
-                .findOverlapping(room.getId(), req.checkIn(), req.checkOut(), BookingStatus.CANCELLED)
-                .isEmpty();
-        if (conflict) {
-            return ResponseEntity.status(409)
-                    .body(Map.of("error", "Room is no longer available for the selected dates"));
-        }
-
-        // 5. Find or create guest
-        Guest guest = guestRepository.findByEmail(req.email())
-                .orElseGet(() -> {
-                    Guest g = new Guest();
-                    g.setFirstName(req.firstName());
-                    g.setLastName(req.lastName());
-                    g.setEmail(req.email());
-                    g.setPhone(req.phone());
-                    return guestRepository.save(g);
-                });
-
-        // 6. Calculate total
-        long nights = ChronoUnit.DAYS.between(req.checkIn(), req.checkOut());
-        BigDecimal pricePerNight = room.getRoomType() != null && room.getRoomType().getPricePerNight() != null
-                ? room.getRoomType().getPricePerNight()
-                : BigDecimal.ZERO;
-        BigDecimal total = pricePerNight.multiply(BigDecimal.valueOf(nights))
-                .setScale(2, RoundingMode.HALF_UP);
-
-        // 7. Create booking
-        Booking booking = new Booking();
-        booking.setGuest(guest);
-        booking.setRoom(room);
-        booking.setCheckInDate(req.checkIn());
-        booking.setCheckOutDate(req.checkOut());
-        booking.setBookingStatus(BookingStatus.CONFIRMED);
-        booking.setPaymentStatus(PaymentStatus.PAID);
-        booking.setTotalAmount(total);
-        booking.setStripePaymentIntentId(req.paymentIntentId());
-        booking.setServices(new ArrayList<>());
-        bookingRepository.save(booking);
-
-        // 8. Mark room as reserved
-        room.setRoomStatus(RoomStatus.RESERVED);
-        roomRepository.save(room);
-
-        // 9. Record payment
-        Payment payment = new Payment();
-        payment.setBooking(booking);
-        payment.setAmount(total);
-        payment.setPaymentMethod("STRIPE");
-        payment.setStatus(PaymentStatus.PAID);
-        payment.setPaymentDate(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        // 10. Send confirmation email (async, non-blocking)
-        try {
-            long emailNights = req.checkOut().toEpochDay() - req.checkIn().toEpochDay();
-            String hotelName = room.getHotel() != null ? room.getHotel().getName() : "LuxStay";
-            emailService.sendBookingConfirmation(new BookingEmailData(
-                    booking.getId().toString().substring(0, 8).toUpperCase(),
-                    guest.getEmail(),
-                    guest.getFirstName() + " " + guest.getLastName(),
-                    hotelName,
-                    String.valueOf(room.getRoomNumber()),
-                    req.checkIn(),
-                    req.checkOut(),
-                    emailNights,
-                    total
-            ));
-        } catch (Exception ignored) {}
-
-        log.info("Public booking {} created for guest {} room {}",
-                booking.getId(), guest.getEmail(), room.getRoomNumber());
-
-        return ResponseEntity.ok(Map.of(
-                "bookingId",   booking.getId(),
-                "guestName",   guest.getFirstName() + " " + guest.getLastName(),
-                "hotel",       room.getHotel() != null ? room.getHotel().getName() : "",
-                "room",        room.getRoomNumber(),
-                "checkIn",     req.checkIn().toString(),
-                "checkOut",    req.checkOut().toString(),
-                "total",       total,
-                "status",      "CONFIRMED"
-        ));
-    }
-
-    /**
      * Guest self-service: look up all bookings for an email address.
      * No authentication required — email is the only identifier for public guests.
      */
@@ -276,93 +146,43 @@ public class PublicBookingController {
         return ResponseEntity.ok(result);
     }
 
+    // ── Online booking: options, quote, pay at hotel, confirm online payment ──
+
+    /** Which payment options the website should offer (pay at hotel / online). */
+    @GetMapping("/options")
+    public ResponseEntity<OnlineBookingDtos.BookingOptions> options() {
+        return ResponseEntity.ok(onlineBookingService.options());
+    }
+
     /**
-     * Direct booking without Stripe (used in dev/demo mode with dummy Stripe keys).
-     * Accepts card details for display only — no real charge is made.
+     * Server-side price of a stay including dynamic pricing, services and voucher.
+     * The checkout page shows this; the booking is created from the same calculation.
      */
-    @PostMapping("/direct")
-    @Transactional
-    public ResponseEntity<?> confirmBookingDirect(@RequestBody DirectBookingRequest req) {
-        if (req.checkIn() == null || req.checkOut() == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Check-in and check-out are required"));
-        }
-        if (!req.checkOut().isAfter(req.checkIn())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Check-out must be after check-in"));
-        }
+    @PostMapping("/quote")
+    public ResponseEntity<BookingQuote> quote(@RequestBody OnlineBookingDtos.QuoteRequest req) {
+        return ResponseEntity.ok(onlineBookingService.quote(req));
+    }
 
-        Room room = roomRepository.findById(req.roomId())
-                .orElseThrow(() -> new EntityNotFoundException("Room not found: " + req.roomId()));
+    /**
+     * Book now, pay at the hotel. The booking is confirmed; its payment stays
+     * PENDING until reception records the money. Nothing is marked as paid here.
+     */
+    @PostMapping("/pay-at-hotel")
+    public ResponseEntity<OnlineBookingDtos.BookingConfirmation> payAtHotel(
+            @RequestBody OnlineBookingDtos.BookingRequest req) {
+        return ResponseEntity.ok(onlineBookingService.bookPayAtHotel(req));
+    }
 
-        boolean conflict = !bookingRepository
-                .findOverlapping(room.getId(), req.checkIn(), req.checkOut(), BookingStatus.CANCELLED)
-                .isEmpty();
-        if (conflict) {
-            return ResponseEntity.status(409)
-                    .body(Map.of("error", "Room is no longer available for the selected dates"));
-        }
-
-        Guest guest = guestRepository.findByEmail(req.email())
-                .orElseGet(() -> {
-                    Guest g = new Guest();
-                    g.setFirstName(req.firstName());
-                    g.setLastName(req.lastName());
-                    g.setEmail(req.email());
-                    g.setPhone(req.phone() != null ? req.phone() : "");
-                    return guestRepository.save(g);
-                });
-
-        long nights = ChronoUnit.DAYS.between(req.checkIn(), req.checkOut());
-        BigDecimal pricePerNight = room.getRoomType() != null && room.getRoomType().getPricePerNight() != null
-                ? room.getRoomType().getPricePerNight()
-                : BigDecimal.ZERO;
-        BigDecimal total = pricePerNight.multiply(BigDecimal.valueOf(nights))
-                .setScale(2, RoundingMode.HALF_UP);
-
-        Booking booking = new Booking();
-        booking.setGuest(guest);
-        booking.setRoom(room);
-        booking.setCheckInDate(req.checkIn());
-        booking.setCheckOutDate(req.checkOut());
-        booking.setBookingStatus(BookingStatus.CONFIRMED);
-        booking.setPaymentStatus(PaymentStatus.PAID);
-        booking.setTotalAmount(total);
-        booking.setServices(new ArrayList<>());
-        bookingRepository.save(booking);
-
-        room.setRoomStatus(RoomStatus.RESERVED);
-        roomRepository.save(room);
-
-        Payment payment = new Payment();
-        payment.setBooking(booking);
-        payment.setAmount(total);
-        payment.setPaymentMethod("CARD");
-        payment.setStatus(PaymentStatus.PAID);
-        payment.setPaymentDate(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        try {
-            String hotelName = room.getHotel() != null ? room.getHotel().getName() : "LuxStay";
-            emailService.sendBookingConfirmation(new BookingEmailData(
-                    booking.getId().toString().substring(0, 8).toUpperCase(),
-                    guest.getEmail(),
-                    guest.getFirstName() + " " + guest.getLastName(),
-                    hotelName, String.valueOf(room.getRoomNumber()),
-                    req.checkIn(), req.checkOut(), nights, total
-            ));
-        } catch (Exception ignored) {}
-
-        log.info("Direct booking {} created for guest {} room {}", booking.getId(), guest.getEmail(), room.getRoomNumber());
-
-        return ResponseEntity.ok(Map.of(
-                "bookingId",   booking.getId(),
-                "guestName",   guest.getFirstName() + " " + guest.getLastName(),
-                "hotel",       room.getHotel() != null ? room.getHotel().getName() : "",
-                "room",        room.getRoomNumber(),
-                "checkIn",     req.checkIn().toString(),
-                "checkOut",    req.checkOut().toString(),
-                "total",       total,
-                "status",      "CONFIRMED"
-        ));
+    /**
+     * Called by the browser after Stripe reported a successful payment. The
+     * server verifies the PaymentIntent with Stripe (status, amount, currency,
+     * booking reference) before confirming; the webhook does the same, so a
+     * closed browser tab cannot lose a paid booking.
+     */
+    @PostMapping("/confirm-payment")
+    public ResponseEntity<OnlineBookingDtos.BookingConfirmation> confirmPayment(
+            @RequestBody OnlineBookingDtos.ConfirmPaymentRequest req) {
+        return ResponseEntity.ok(onlineBookingService.confirmStripePayment(req.paymentIntentId()));
     }
 
     /**

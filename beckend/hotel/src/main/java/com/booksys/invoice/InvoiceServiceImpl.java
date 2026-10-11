@@ -1,5 +1,7 @@
 package com.booksys.invoice;
 
+import com.booksys.payment.BookingPaymentSync;
+
 import com.booksys.booking.Booking;
 import com.booksys.booking.BookingRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,15 +17,18 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final BookingRepository bookingRepository;
     private final InvoiceMapper invoiceMapper;
+    private final BookingPaymentSync paymentSync;
 
     public InvoiceServiceImpl(
             InvoiceRepository invoiceRepository,
             BookingRepository bookingRepository,
-            InvoiceMapper invoiceMapper
+            InvoiceMapper invoiceMapper,
+            BookingPaymentSync paymentSync
     ) {
         this.invoiceRepository = invoiceRepository;
         this.bookingRepository = bookingRepository;
         this.invoiceMapper = invoiceMapper;
+        this.paymentSync = paymentSync;
     }
 
     @Override
@@ -88,9 +93,19 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public InvoiceDTO markAsPaid(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found: " + invoiceId));
+        if (invoice.getStatus() == InvoiceStatus.CANCELLED) {
+            throw new IllegalStateException("A cancelled invoice cannot be marked as paid");
+        }
+        // Marking the invoice paid means the money arrived: record the open
+        // balance as a payment, so booking, payments and invoice agree.
+        Booking booking = invoice.getBooking();
+        if (booking != null && booking.getBookingStatus() != com.booksys.booking.BookingStatus.CANCELLED) {
+            paymentSync.settleOutstanding(booking, "INVOICE");
+        }
         invoice.setStatus(InvoiceStatus.PAID);
         return invoiceMapper.toDTO(invoiceRepository.save(invoice));
     }

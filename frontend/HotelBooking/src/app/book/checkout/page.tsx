@@ -1,21 +1,61 @@
 "use client";
 
+/**
+ * Public checkout page.
+ *
+ * Prices come from the server (POST /api/public/bookings/quote), so the total
+ * shown here is exactly what the booking and the Stripe charge use. The page
+ * never collects card data itself: online payment goes through the Stripe
+ * Payment Element, and "pay at the hotel" books without any payment at all.
+ */
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Hotel, Calendar, Users, CreditCard, User, Mail, Phone, ArrowLeft, Lock, ShoppingBag } from "lucide-react";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { Hotel, Calendar, Users, CreditCard, User, Mail, Phone, ArrowLeft, Lock, ShoppingBag, Building2, Tag } from "lucide-react";
 import s from "@/styles/Checkout.module.css";
+import { type BookingConfirmation, confirmationQuery, errorMessage, money } from "@/components/lib/onlineBooking";
 import { useTranslation } from "react-i18next";
 import "@/app/i18n";
 
-type BookingSummary = {
-  roomId: string; checkIn: string; checkOut: string; nights: number;
-  hotel: string; room: string; type: string; price: number; total: number; imageUrl: string;
-};
 type ServiceItem = { id: string; name: string; description: string; price: number };
+
+type Quote = {
+  nights: number;
+  nightly: { date: string; price: number }[];
+  roomTotal: number;
+  services: { id: string; name: string; price: number }[];
+  servicesTotal: number;
+  voucherCode: string | null;
+  voucherName: string | null;
+  discount: number;
+  total: number;
+  currency: string;
+};
+
+type BookingOptions = {
+  payAtHotel: boolean;
+  onlinePayment: boolean;
+  stripePublishableKey: string | null;
+  maxNights: number;
+};
+
+type StripeCheckout = {
+  bookingId: string;
+  reference: string;
+  clientSecret: string;
+  paymentIntentId: string;
+  amount: number;
+  currency: string;
+  publishableKey: string;
+  holdExpiresAt: string;
+};
+
+type PaymentOption = "PAY_AT_HOTEL" | "STRIPE";
 
 function fmtDate(d: string) {
   if (!d) return "";
-  return new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(d + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export default function CheckoutPage() {
@@ -24,107 +64,156 @@ export default function CheckoutPage() {
   const router = useRouter();
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080";
 
-  const summary: BookingSummary = {
+  const stay = {
     roomId:   params.get("roomId")   ?? "",
     checkIn:  params.get("checkIn")  ?? "",
     checkOut: params.get("checkOut") ?? "",
-    nights:   Number(params.get("nights") ?? 1),
     hotel:    params.get("hotel")    ?? "",
     room:     params.get("room")     ?? "",
     type:     params.get("type")     ?? "",
-    price:    Number(params.get("price") ?? 0),
-    total:    Number(params.get("total") ?? 0),
     imageUrl: params.get("imageUrl") ?? "",
   };
 
   const [guest, setGuest] = useState({ firstName: "", lastName: "", email: "", phone: "" });
-  const [card,  setCard]  = useState({ number: "", expiry: "", cvv: "" });
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState<string | null>(null);
-  const [promoCode,      setPromoCode]      = useState("");
-  const [promoApplied,   setPromoApplied]   = useState<{ code: string; discountAmount: number; name: string } | null>(null);
-  const [promoError,     setPromoError]     = useState<string | null>(null);
-  const [checkingPromo,  setCheckingPromo]  = useState(false);
-  const [services,         setServices]         = useState<ServiceItem[]>([]);
+  const [specialRequests, setSpecialRequests] = useState("");
+  const [options, setOptions] = useState<BookingOptions | null>(null);
+  const [paymentOption, setPaymentOption] = useState<PaymentOption>("PAY_AT_HOTEL");
+  const [services, setServices] = useState<ServiceItem[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [voucherInput, setVoucherInput] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<string | null>(null);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [stripeCheckout, setStripeCheckout] = useState<StripeCheckout | null>(null);
 
+  // Payment options and add-on services
   useEffect(() => {
+    fetch(`${API_BASE}/api/public/bookings/options`)
+      .then(r => (r.ok ? r.json() : null))
+      .then((o: BookingOptions | null) => {
+        if (!o) return;
+        setOptions(o);
+        setPaymentOption(o.payAtHotel ? "PAY_AT_HOTEL" : "STRIPE");
+      })
+      .catch(() => {});
     fetch(`${API_BASE}/api/public/bookings/services`)
-      .then(r => r.ok ? r.json() : [])
+      .then(r => (r.ok ? r.json() : []))
       .then((d: ServiceItem[]) => setServices(Array.isArray(d) ? d : []))
       .catch(() => {});
   }, [API_BASE]);
 
-  const servicesTotal = useMemo(
-    () => services.filter(sv => selectedServices.includes(sv.id)).reduce((acc, sv) => acc + Number(sv.price), 0),
-    [services, selectedServices]
-  );
-  const promoDiscount = promoApplied?.discountAmount ?? 0;
-  const grandTotal = Math.max(0, summary.total + servicesTotal - promoDiscount);
+  // Server-side quote whenever the stay, the services or the voucher change
+  const requestQuote = useCallback(async (voucherCode: string | null) => {
+    const res = await fetch(`${API_BASE}/api/public/bookings/quote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        roomId: stay.roomId, checkIn: stay.checkIn, checkOut: stay.checkOut,
+        serviceIds: selectedServices, voucherCode,
+      }),
+    });
+    if (!res.ok) throw new Error(await errorMessage(res, "Could not calculate the price."));
+    return (await res.json()) as Quote;
+  }, [API_BASE, stay.roomId, stay.checkIn, stay.checkOut, selectedServices]);
+
+  useEffect(() => {
+    if (!stay.roomId || !stay.checkIn || !stay.checkOut) return;
+    let alive = true;
+    requestQuote(appliedVoucher)
+      .then(q => { if (alive) { setQuote(q); setQuoteError(null); } })
+      .catch((e: Error) => {
+        if (!alive) return;
+        if (appliedVoucher) {
+          // The voucher no longer applies (e.g. services changed): drop it and requote
+          setVoucherError(e.message);
+          setAppliedVoucher(null);
+        } else {
+          setQuote(null);
+          setQuoteError(e.message);
+        }
+      });
+    return () => { alive = false; };
+  }, [requestQuote, appliedVoucher, stay.roomId, stay.checkIn, stay.checkOut]);
+
+  async function applyVoucher() {
+    const code = voucherInput.trim();
+    if (!code) return;
+    setVoucherError(null);
+    try {
+      const q = await requestQuote(code);
+      setAppliedVoucher(code);
+      setQuote(q);
+    } catch (e) {
+      setVoucherError(e instanceof Error ? e.message : "Invalid voucher code");
+    }
+  }
 
   function toggleService(id: string) {
-    setSelectedServices(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    setSelectedServices(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
   }
 
-  async function applyPromo() {
-    if (!promoCode.trim()) return;
-    setCheckingPromo(true); setPromoError(null); setPromoApplied(null);
-    try {
-      const nights = summary.nights || 1;
-      const res = await fetch(`${API_BASE}/api/vouchers/validate?code=${encodeURIComponent(promoCode.trim())}&totalAmount=${summary.total + servicesTotal}&nights=${nights}`);
-      const data = await res.json();
-      if (data.valid) {
-        setPromoApplied({ code: promoCode.trim().toUpperCase(), discountAmount: Number(data.discountAmount), name: data.name });
-        setPromoError(null);
-      } else {
-        setPromoError(data.reason ?? "Invalid promo code");
-      }
-    } catch { setPromoError("Could not validate code. Try again."); }
-    finally { setCheckingPromo(false); }
-  }
-
-  const imgSrc = summary.imageUrl
-    ? (summary.imageUrl.startsWith("http") ? summary.imageUrl : `${API_BASE}/${summary.imageUrl}`)
+  const currency = quote?.currency ?? "EUR";
+  const imgSrc = stay.imageUrl
+    ? (stay.imageUrl.startsWith("http") ? stay.imageUrl : `${API_BASE}/${stay.imageUrl}`)
     : null;
 
-  function fmtCard(v: string) { return v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim(); }
-  function fmtExpiry(v: string) { const d = v.replace(/\D/g, "").slice(0, 4); return d.length > 2 ? d.slice(0, 2) + "/" + d.slice(2) : d; }
+  function bookingBody() {
+    return JSON.stringify({
+      roomId: stay.roomId, checkIn: stay.checkIn, checkOut: stay.checkOut,
+      firstName: guest.firstName.trim(), lastName: guest.lastName.trim(),
+      email: guest.email.trim(), phone: guest.phone.trim() || null,
+      serviceIds: selectedServices, voucherCode: appliedVoucher,
+      specialRequests: specialRequests.trim() || null,
+    });
+  }
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  function goToConfirmation(c: BookingConfirmation) {
+    router.push(`/book/confirmation?${confirmationQuery(c)}`);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!guest.firstName || !guest.lastName || !guest.email) { setError("Please fill in all required fields."); return; }
-    if (!card.number || !card.expiry || !card.cvv) { setError("Please fill in all card details."); return; }
-    setError(null); setLoading(true);
+    if (!guest.firstName.trim() || !guest.lastName.trim() || !guest.email.trim()) {
+      setError(t("checkoutFillRequired", "Please fill in all required fields."));
+      return;
+    }
+    if (!quote) {
+      setError(quoteError ?? t("checkoutNoPrice", "The price could not be calculated."));
+      return;
+    }
+    setError(null);
+    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/public/bookings/direct`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roomId: summary.roomId, checkIn: summary.checkIn, checkOut: summary.checkOut,
-          firstName: guest.firstName, lastName: guest.lastName, email: guest.email, phone: guest.phone,
-          // Card details are collected to make the demo checkout feel real, but they
-          // are not sent: the backend never stored them and unused card data on the
-          // wire still ends up in request logs and proxies.
-          serviceIds: selectedServices,
-        }),
-      });
-      if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b.error ?? "Booking failed."); }
-      const booking = await res.json();
-      const p = new URLSearchParams({
-        bookingId: String(booking.bookingId),
-        guestName: booking.guestName ?? `${guest.firstName} ${guest.lastName}`,
-        hotel: booking.hotel ?? summary.hotel,
-        room: String(booking.room ?? summary.room),
-        checkIn: booking.checkIn ?? summary.checkIn,
-        checkOut: booking.checkOut ?? summary.checkOut,
-        total: String(booking.total ?? grandTotal),
-        email: guest.email,
-      });
-      router.push(`/book/confirmation?${p.toString()}`);
-    } catch (err: unknown) {
+      if (paymentOption === "PAY_AT_HOTEL") {
+        const res = await fetch(`${API_BASE}/api/public/bookings/pay-at-hotel`, {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: bookingBody(),
+        });
+        if (!res.ok) throw new Error(await errorMessage(res, "Booking failed."));
+        goToConfirmation(await res.json());
+      } else {
+        const res = await fetch(`${API_BASE}/api/public/stripe/create-payment-intent`, {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: bookingBody(),
+        });
+        if (!res.ok) throw new Error(await errorMessage(res, "Online payment could not be started."));
+        setStripeCheckout(await res.json());
+      }
+    } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
-    } finally { setLoading(false); }
-  }, [guest, card, summary, selectedServices, grandTotal, router, API_BASE]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const stripePromise = useMemo<Promise<Stripe | null> | null>(
+    () => (stripeCheckout?.publishableKey ? loadStripe(stripeCheckout.publishableKey) : null),
+    [stripeCheckout?.publishableKey]
+  );
+
+  const canPayAtHotel = options?.payAtHotel ?? true;
+  const canPayOnline = options?.onlinePayment ?? false;
 
   return (
     <div className={s.page}>
@@ -132,14 +221,13 @@ export default function CheckoutPage() {
       <div className={s.hero}>
         <div className={s.heroInner}>
           <button type="button" onClick={() => router.push("/book")} className={s.backBtn}>
-            <ArrowLeft size={15} /> Back to rooms
+            <ArrowLeft size={15} /> {t("backToRooms", "Back to rooms")}
           </button>
-          <h1 className={s.heroTitle}>Complete your booking</h1>
-          <p className={s.heroSub}>Secure checkout — your information is encrypted</p>
+          <h1 className={s.heroTitle}>{t("completeYourBooking", "Complete your booking")}</h1>
+          <p className={s.heroSub}>{t("checkoutSubtitle", "Your price is calculated by the hotel and shown before you book")}</p>
         </div>
       </div>
 
-      {/* Content */}
       <form onSubmit={handleSubmit}>
         <div className={s.grid}>
 
@@ -151,46 +239,33 @@ export default function CheckoutPage() {
               <div className={s.cardHeader}>
                 <span className={s.iconBubble}><User size={18} /></span>
                 <div>
-                  <p className={s.cardTitle}>Guest Information</p>
-                  <p className={s.cardSub}>Fields marked * are required</p>
+                  <p className={s.cardTitle}>{t("guestInformation", "Guest information")}</p>
+                  <p className={s.cardSub}>{t("fieldsRequired", "Fields marked * are required")}</p>
                 </div>
               </div>
               <div className={s.cardBody}>
                 <div className={s.fieldGrid2}>
-                  <Field label="First Name *" icon={<User size={14}/>} value={guest.firstName}
-                    onChange={v => setGuest(g => ({ ...g, firstName: v }))} placeholder="John" />
-                  <Field label="Last Name *" icon={<User size={14}/>} value={guest.lastName}
-                    onChange={v => setGuest(g => ({ ...g, lastName: v }))} placeholder="Doe" />
+                  <Field label={`${t("firstName", "First name")} *`} icon={<User size={14}/>} value={guest.firstName}
+                    onChange={v => setGuest(g => ({ ...g, firstName: v }))} placeholder="John" maxLength={100}
+                    disabled={!!stripeCheckout} autoComplete="given-name" />
+                  <Field label={`${t("lastName", "Last name")} *`} icon={<User size={14}/>} value={guest.lastName}
+                    onChange={v => setGuest(g => ({ ...g, lastName: v }))} placeholder="Doe" maxLength={100}
+                    disabled={!!stripeCheckout} autoComplete="family-name" />
                 </div>
                 <div className={s.fieldGrid2mt}>
-                  <Field label="Email *" icon={<Mail size={14}/>} type="email" value={guest.email}
-                    onChange={v => setGuest(g => ({ ...g, email: v }))} placeholder="john@example.com" />
-                  <Field label="Phone" icon={<Phone size={14}/>} value={guest.phone}
-                    onChange={v => setGuest(g => ({ ...g, phone: v }))} placeholder="+1 555 000 0000" />
+                  <Field label={`${t("email", "Email")} *`} icon={<Mail size={14}/>} type="email" value={guest.email}
+                    onChange={v => setGuest(g => ({ ...g, email: v }))} placeholder="john@example.com" maxLength={254}
+                    disabled={!!stripeCheckout} autoComplete="email" />
+                  <Field label={t("phone", "Phone")} icon={<Phone size={14}/>} value={guest.phone}
+                    onChange={v => setGuest(g => ({ ...g, phone: v }))} placeholder="+49 170 0000000" maxLength={40}
+                    disabled={!!stripeCheckout} autoComplete="tel" />
                 </div>
-              </div>
-            </div>
-
-            {/* Payment */}
-            <div className={s.card}>
-              <div className={s.cardHeader}>
-                <span className={s.iconBubble}><CreditCard size={18} /></span>
-                <div>
-                  <p className={s.cardTitle}>Payment Details</p>
-                  <p className={s.cardSub}><Lock size={11} /> 256-bit SSL encrypted</p>
-                </div>
-              </div>
-              <div className={s.cardBodyFlex}>
-                <Field label="Card Number *" icon={<CreditCard size={14}/>} value={card.number}
-                  onChange={v => setCard(c => ({ ...c, number: fmtCard(v) }))}
-                  placeholder="1234 5678 9012 3456" maxLength={19} />
-                <div className={s.fieldGrid2}>
-                  <Field label="Expiry (MM/YY) *" icon={<Calendar size={14}/>} value={card.expiry}
-                    onChange={v => setCard(c => ({ ...c, expiry: fmtExpiry(v) }))}
-                    placeholder="MM/YY" maxLength={5} />
-                  <Field label="CVV *" icon={<Lock size={14}/>} type="password" value={card.cvv}
-                    onChange={v => setCard(c => ({ ...c, cvv: v.replace(/\D/g, "").slice(0, 4) }))}
-                    placeholder="123" maxLength={4} />
+                <div className={s.fieldGrid2mt}>
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <label className={s.fieldLabel}>{t("specialRequests", "Special requests")}</label>
+                    <textarea className={s.fieldInput} rows={2} maxLength={1000} value={specialRequests}
+                      disabled={!!stripeCheckout} onChange={e => setSpecialRequests(e.target.value)} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -201,23 +276,22 @@ export default function CheckoutPage() {
                 <div className={s.cardHeader}>
                   <span className={s.iconBubble}><ShoppingBag size={18} /></span>
                   <div>
-                    <p className={s.cardTitle}>Add-on Services — {summary.hotel}</p>
-                    <p className={s.cardSub}>Enhance your stay with extra services</p>
+                    <p className={s.cardTitle}>{t("addOnServices", "Add-on services")}{stay.hotel ? ` — ${stay.hotel}` : ""}</p>
+                    <p className={s.cardSub}>{t("addOnServicesSub", "Enhance your stay with extra services")}</p>
                   </div>
                 </div>
                 <div className={s.servicesList}>
                   {services.map(sv => {
                     const checked = selectedServices.includes(sv.id);
                     return (
-                      <label key={sv.id}
-                        className={`${s.serviceItem}${checked ? ` ${s.serviceItemChecked}` : ""}`}>
-                        <input type="checkbox" className={s.serviceCheckbox}
-                          checked={checked} onChange={() => toggleService(sv.id)} />
+                      <label key={sv.id} className={`${s.serviceItem}${checked ? ` ${s.serviceItemChecked}` : ""}`}>
+                        <input type="checkbox" className={s.serviceCheckbox} checked={checked}
+                          disabled={!!stripeCheckout} onChange={() => toggleService(sv.id)} />
                         <div className={s.serviceInfo}>
                           <div className={s.serviceName}>{sv.name}</div>
                           {sv.description && <div className={s.serviceDesc}>{sv.description}</div>}
                         </div>
-                        <div className={s.servicePrice}>+€{Number(sv.price).toFixed(2)}</div>
+                        <div className={s.servicePrice}>+{money(Number(sv.price), currency)}</div>
                       </label>
                     );
                   })}
@@ -225,13 +299,106 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {error && <div className={s.errorAlert}>{error}</div>}
+            {/* Voucher */}
+            <div className={s.card}>
+              <div className={s.cardHeader}>
+                <span className={s.iconBubble}><Tag size={18} /></span>
+                <div>
+                  <p className={s.cardTitle}>{t("voucher", "Voucher")}</p>
+                  <p className={s.cardSub}>{t("voucherSub", "Have a promo code? It is checked by the hotel before you book.")}</p>
+                </div>
+              </div>
+              <div className={s.cardBody}>
+                <div className={s.voucherRow}>
+                  <input className={s.fieldInput} value={voucherInput} maxLength={64}
+                    disabled={!!stripeCheckout || !!appliedVoucher}
+                    onChange={e => { setVoucherInput(e.target.value); setVoucherError(null); }}
+                    placeholder="SUMMER2026" />
+                  {appliedVoucher ? (
+                    <button type="button" className={s.secondaryBtn} disabled={!!stripeCheckout}
+                      onClick={() => { setAppliedVoucher(null); setVoucherInput(""); }}>
+                      {t("remove", "Remove")}
+                    </button>
+                  ) : (
+                    <button type="button" className={s.secondaryBtn} disabled={!!stripeCheckout || !voucherInput.trim()}
+                      onClick={applyVoucher}>
+                      {t("apply", "Apply")}
+                    </button>
+                  )}
+                </div>
+                {voucherError && <p className={s.inlineError}>{voucherError}</p>}
+              </div>
+            </div>
 
-            <button type="submit" disabled={loading}
-              className={`${s.submitBtn}${loading ? ` ${s.submitBtnDisabled}` : ""}`}>
-              <Lock size={16} />
-              {loading ? "Processing…" : `Pay €${grandTotal.toFixed(2)} & Confirm Booking`}
-            </button>
+            {/* Payment option */}
+            <div className={s.card}>
+              <div className={s.cardHeader}>
+                <span className={s.iconBubble}><CreditCard size={18} /></span>
+                <div>
+                  <p className={s.cardTitle}>{t("payment", "Payment")}</p>
+                  <p className={s.cardSub}>{t("paymentSub", "Card details are only ever entered in Stripe's secure form")}</p>
+                </div>
+              </div>
+              <div className={s.cardBodyFlex}>
+                {canPayAtHotel && (
+                  <label className={`${s.paymentOption}${paymentOption === "PAY_AT_HOTEL" ? ` ${s.paymentOptionActive}` : ""}`}>
+                    <input type="radio" name="paymentOption" checked={paymentOption === "PAY_AT_HOTEL"}
+                      disabled={!!stripeCheckout} onChange={() => setPaymentOption("PAY_AT_HOTEL")} />
+                    <Building2 size={18} />
+                    <span>
+                      <strong>{t("payAtHotel", "Pay at the hotel")}</strong>
+                      <small>{t("payAtHotelSub", "Your room is reserved now; you pay on arrival or departure.")}</small>
+                    </span>
+                  </label>
+                )}
+                {canPayOnline && (
+                  <label className={`${s.paymentOption}${paymentOption === "STRIPE" ? ` ${s.paymentOptionActive}` : ""}`}>
+                    <input type="radio" name="paymentOption" checked={paymentOption === "STRIPE"}
+                      disabled={!!stripeCheckout} onChange={() => setPaymentOption("STRIPE")} />
+                    <CreditCard size={18} />
+                    <span>
+                      <strong>{t("payOnline", "Pay online now")}</strong>
+                      <small>{t("payOnlineSub", "Card and other methods via Stripe. The room is held for you while you pay.")}</small>
+                    </span>
+                  </label>
+                )}
+                {!canPayAtHotel && !canPayOnline && (
+                  <p className={s.inlineError}>{t("noPaymentOptions", "Online booking is currently not available. Please contact the hotel.")}</p>
+                )}
+
+                {stripeCheckout && stripePromise && (
+                  <div className={s.stripeBox}>
+                    <p className={s.cardSub}>
+                      {t("roomHeldUntil", "Your room is held until")}{" "}
+                      {new Date(stripeCheckout.holdExpiresAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                    <Elements stripe={stripePromise} options={{ clientSecret: stripeCheckout.clientSecret }}>
+                      <StripePaymentStep
+                        checkout={stripeCheckout}
+                        apiBase={API_BASE}
+                        onConfirmed={goToConfirmation}
+                        onProcessing={() => router.push(`/book/confirmation?reference=${encodeURIComponent(stripeCheckout.reference)}&paymentStatus=PROCESSING&total=${stripeCheckout.amount}&currency=${stripeCheckout.currency}`)}
+                        onError={setError}
+                      />
+                    </Elements>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {(error || quoteError) && <div className={s.errorAlert}>{error ?? quoteError}</div>}
+
+            {!stripeCheckout && (
+              <button type="submit" disabled={loading || !quote || (!canPayAtHotel && !canPayOnline)}
+                className={`${s.submitBtn}${loading || !quote ? ` ${s.submitBtnDisabled}` : ""}`}>
+                <Lock size={16} />
+                {loading
+                  ? t("processing", "Processing…")
+                  : paymentOption === "PAY_AT_HOTEL"
+                    ? `${t("bookNowPayAtHotel", "Book now, pay at the hotel")} — ${quote ? money(quote.total, currency) : "…"}`
+                    : `${t("continueToPayment", "Continue to payment")} — ${quote ? money(quote.total, currency) : "…"}`}
+              </button>
+            )}
           </div>
 
           {/* Right: Summary */}
@@ -246,39 +413,47 @@ export default function CheckoutPage() {
               </div>
             )}
             <div className={s.summaryMeta}>
-              {summary.type && <span className={s.summaryTypeBadge}>{summary.type}</span>}
-              <p className={s.summaryRoomName}>Room {summary.room}</p>
-              {summary.hotel && <p className={s.summaryHotel}>{summary.hotel}</p>}
+              {stay.type && <span className={s.summaryTypeBadge}>{stay.type}</span>}
+              <p className={s.summaryRoomName}>{t("room", "Room")} {stay.room}</p>
+              {stay.hotel && <p className={s.summaryHotel}>{stay.hotel}</p>}
             </div>
             <div className={s.summaryDivider} />
             <div className={s.summaryRows}>
-              <SummaryRow icon={<Calendar size={14}/>} label="Check-in"  value={fmtDate(summary.checkIn)} />
-              <SummaryRow icon={<Calendar size={14}/>} label="Check-out" value={fmtDate(summary.checkOut)} />
-              <SummaryRow icon={<Users size={14}/>}    label="Duration"
-                value={`${summary.nights} night${summary.nights !== 1 ? "s" : ""}`} />
+              <SummaryRow icon={<Calendar size={14}/>} label={t("checkIn", "Check-in")}  value={fmtDate(stay.checkIn)} />
+              <SummaryRow icon={<Calendar size={14}/>} label={t("checkOut", "Check-out")} value={fmtDate(stay.checkOut)} />
+              <SummaryRow icon={<Users size={14}/>} label={t("duration", "Duration")}
+                value={quote ? `${quote.nights} ${quote.nights === 1 ? t("night", "night") : t("nights", "nights")}` : "…"} />
             </div>
             <div className={s.summaryDivider} />
             <div className={s.summaryPricing}>
-              <div className={s.summaryPriceRow}>
-                <span className={s.summaryPriceLabel}>€{summary.price}/night × {summary.nights}</span>
-                <span className={s.summaryPriceValue}>€{(summary.price * summary.nights).toFixed(2)}</span>
-              </div>
-              {servicesTotal > 0 && (
-                <div className={s.summaryPriceRow}>
-                  <span className={s.summaryPriceLabel}>{t('services')}</span>
-                  <span className={s.summaryPriceValue}>+€{servicesTotal.toFixed(2)}</span>
-                </div>
+              {quote ? (
+                <>
+                  <div className={s.summaryPriceRow}>
+                    <span className={s.summaryPriceLabel}>
+                      {t("roomNights", "Room")} · {quote.nights} {quote.nights === 1 ? t("night", "night") : t("nights", "nights")}
+                    </span>
+                    <span className={s.summaryPriceValue}>{money(quote.roomTotal, currency)}</span>
+                  </div>
+                  {quote.servicesTotal > 0 && (
+                    <div className={s.summaryPriceRow}>
+                      <span className={s.summaryPriceLabel}>{t("services", "Services")}</span>
+                      <span className={s.summaryPriceValue}>+{money(quote.servicesTotal, currency)}</span>
+                    </div>
+                  )}
+                  {quote.discount > 0 && (
+                    <div className={s.summaryPriceRow}>
+                      <span className={s.summaryPriceLabel} style={{ color: "#16a34a" }}>🏷️ {quote.voucherName ?? quote.voucherCode}</span>
+                      <span className={s.summaryPriceValue} style={{ color: "#16a34a" }}>−{money(quote.discount, currency)}</span>
+                    </div>
+                  )}
+                  <div className={s.summaryTotal}>
+                    <span className={s.summaryTotalLabel}>{t("total", "Total")}</span>
+                    <span className={s.summaryTotalValue}>{money(quote.total, currency)}</span>
+                  </div>
+                </>
+              ) : (
+                <p className={s.cardSub}>{quoteError ?? t("calculatingPrice", "Calculating price…")}</p>
               )}
-              {promoApplied && (
-                <div className={s.summaryPriceRow}>
-                  <span className={s.summaryPriceLabel} style={{ color: "#16a34a" }}>🏷️ {promoApplied.name}</span>
-                  <span className={s.summaryPriceValue} style={{ color: "#16a34a" }}>-€{promoApplied.discountAmount.toFixed(2)}</span>
-                </div>
-              )}
-              <div className={s.summaryTotal}>
-                <span className={s.summaryTotalLabel}>{t('total')}</span>
-                <span className={s.summaryTotalValue}>€{grandTotal.toFixed(2)}</span>
-              </div>
             </div>
           </div>
         </div>
@@ -287,15 +462,81 @@ export default function CheckoutPage() {
   );
 }
 
-function Field({ label, value, onChange, placeholder, type = "text", icon, maxLength }: {
+/**
+ * Stripe Payment Element plus the "Pay" button. After Stripe reports success,
+ * the booking is confirmed on the server, which re-checks the payment with Stripe.
+ */
+function StripePaymentStep({ checkout, apiBase, onConfirmed, onProcessing, onError }: {
+  checkout: StripeCheckout;
+  apiBase: string;
+  onConfirmed: (c: BookingConfirmation) => void;
+  onProcessing: () => void;
+  onError: (message: string) => void;
+}) {
+  const { t } = useTranslation();
+  const stripe = useStripe();
+  const elements = useElements();
+  const [busy, setBusy] = useState(false);
+
+  async function pay() {
+    if (!stripe || !elements) return;
+    setBusy(true);
+    onError("");
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      // Used only by payment methods that need a redirect (e.g. bank authentication)
+      confirmParams: { return_url: `${window.location.origin}/book/confirmation` },
+      redirect: "if_required",
+    });
+    if (error) {
+      onError(error.message ?? "Payment failed");
+      setBusy(false);
+      return;
+    }
+    if (paymentIntent?.status === "processing") {
+      onProcessing();
+      return;
+    }
+    if (paymentIntent?.status !== "succeeded") {
+      onError("The payment was not completed.");
+      setBusy(false);
+      return;
+    }
+    const res = await fetch(`${apiBase}/api/public/bookings/confirm-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentIntentId: paymentIntent.id }),
+    });
+    if (!res.ok) {
+      onError(await errorMessage(res, "Your payment was received, but the booking could not be confirmed. Please contact the hotel."));
+      setBusy(false);
+      return;
+    }
+    onConfirmed(await res.json());
+  }
+
+  return (
+    <div>
+      <PaymentElement />
+      <button type="button" onClick={pay} disabled={!stripe || busy}
+        className={`${s.submitBtn}${!stripe || busy ? ` ${s.submitBtnDisabled}` : ""}`} style={{ marginTop: 16 }}>
+        <Lock size={16} />
+        {busy ? t("processing", "Processing…") : `${t("payNow", "Pay now")} — ${money(checkout.amount, checkout.currency)}`}
+      </button>
+    </div>
+  );
+}
+
+function Field({ label, value, onChange, placeholder, type = "text", icon, maxLength, disabled, autoComplete }: {
   label: string; value: string; onChange: (v: string) => void;
   placeholder?: string; type?: string; icon?: React.ReactNode; maxLength?: number;
+  disabled?: boolean; autoComplete?: string;
 }) {
   return (
     <div>
       <label className={s.fieldLabel}>{icon} {label}</label>
-      <input className={s.fieldInput} type={type} value={value}
-        placeholder={placeholder} maxLength={maxLength}
+      <input className={s.fieldInput} type={type} value={value} disabled={disabled}
+        placeholder={placeholder} maxLength={maxLength} autoComplete={autoComplete}
         onChange={e => onChange(e.target.value)} />
     </div>
   );

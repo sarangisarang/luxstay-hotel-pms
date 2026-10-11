@@ -41,6 +41,8 @@ services:
       STRIPE_SECRET_KEY:      ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_WEBHOOK_SECRET:  ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_ENABLED:         ${STRIPE_ENABLED:-false}
+      PAY_AT_HOTEL_ENABLED:   ${PAY_AT_HOTEL_ENABLED:-true}
       MAIL_HOST:              ${MAIL_HOST:-smtp.gmail.com}
       MAIL_PORT:              ${MAIL_PORT:-587}
       MAIL_USER:              ${MAIL_USER}

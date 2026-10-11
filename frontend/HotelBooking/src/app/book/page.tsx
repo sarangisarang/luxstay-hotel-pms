@@ -331,6 +331,7 @@ function RoomCard({ room, nights, onBook }: { room: Room; nights: number; onBook
           </div>
           <div className={bs.priceWrap}>
             <p className={bs.priceMain}>
+              <span className={bs.priceNight}>{t('priceFrom', 'from')} </span>
               €{room.pricePerNight}<span className={bs.priceNight}>{t('perNight')}</span>
             </p>
           </div>
@@ -345,7 +346,9 @@ function RoomCard({ room, nights, onBook }: { room: Room; nights: number; onBook
 
         {nights > 0 && (
           <div className={bs.roomTotalBox}>
-            <span className={bs.roomTotalLabel}>{nights} {t('nights')} {t('total')}</span>
+            {/* Base rate only: weekend/season prices, services and vouchers are
+                calculated by the server on the checkout page before booking. */}
+            <span className={bs.roomTotalLabel}>{nights} {t('nights')} · {t('priceFrom', 'from')}</span>
             <span className={bs.roomTotalValue}>€{total.toFixed(2)}</span>
           </div>
         )}

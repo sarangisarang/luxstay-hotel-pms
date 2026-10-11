@@ -13,7 +13,7 @@ public class PaymentMapper {
      * Keeps only the last four digits of a card number. Everything else is
      * dropped here, at the boundary, so no other layer ever sees a full PAN.
      */
-    static String lastFour(String cardNumber) {
+    public static String lastFour(String cardNumber) {
         if (cardNumber == null) return null;
         String digits = cardNumber.replaceAll("\\D", "");
         return digits.length() < 4 ? null : digits.substring(digits.length() - 4);

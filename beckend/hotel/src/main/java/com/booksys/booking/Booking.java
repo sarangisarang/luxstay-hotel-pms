@@ -1,7 +1,6 @@
 package com.booksys.booking;
 
 import com.booksys.guest.Guest;
-import com.booksys.payment.Payment;
 import com.booksys.payment.PaymentStatus;
 import com.booksys.room.Room;
 import com.booksys.service.ServiceEntity;
@@ -72,11 +71,6 @@ public class Booking {
     @JsonBackReference("guest-bookings")
     private Guest guest;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Payment payment;
-
     @ManyToMany
     @JoinTable(
             name = "booking_services",
@@ -87,6 +81,7 @@ public class Booking {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonManagedReference("booking-services")
+    @Builder.Default
     private List<ServiceEntity> services = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -107,6 +102,14 @@ public class Booking {
 
     @Column(name = "special_requests", columnDefinition = "TEXT")
     private String specialRequests;
+
+    /** Voucher applied when the booking was made (shown on the invoice). */
+    @Column(name = "voucher_code", length = 64)
+    private String voucherCode;
+
+    /** Voucher discount already deducted from {@link #totalAmount}. */
+    @Column(name = "discount_amount", precision = 12, scale = 2)
+    private BigDecimal discountAmount;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

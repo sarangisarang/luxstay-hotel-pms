@@ -752,8 +752,10 @@ public class BookingServiceImpl implements BookingService {
             booking.setBookingStatus(BookingStatus.COMPLETED);
         } else {
             booking.setBookingStatus(BookingStatus.CHECKED_OUT);
-            // make the state explicit
-            booking.setPaymentStatus(PaymentStatus.UNPAID);
+            // Make the open balance explicit; a deposit already received stays visible
+            if (booking.getPaymentStatus() != PaymentStatus.PARTIALLY_PAID) {
+                booking.setPaymentStatus(PaymentStatus.UNPAID);
+            }
         }
 
         // Free the room

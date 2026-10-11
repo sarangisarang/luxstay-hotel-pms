@@ -59,10 +59,21 @@ export default function AddPayment() {
           const res = await api.get(`/api/bookings/${bookingId}`);
           total = toNumber(res.data?.totalAmount);
         }
+        // Money already received (deposits) is subtracted, so the form
+        // proposes the open balance instead of the full total again.
+        let paid = 0;
+        try {
+          const pr = await api.get(`/api/payments/booking/${bookingId}`);
+          const rows: { amount?: Money; status?: string }[] = Array.isArray(pr.data) ? pr.data : [];
+          paid = rows.filter(p => p.status === "PAID").reduce((sum, p) => sum + toNumber(p.amount), 0);
+        } catch { /* payments are optional for the hint */ }
         if (!alive) return;
         const n = Number.isFinite(total) ? total : 0;
-        setAmount(n.toFixed(2));
-        setTotalInfo(`Booking total: $${n.toFixed(2)}`);
+        const open = Math.max(0, n - paid);
+        setAmount(open.toFixed(2));
+        setTotalInfo(paid > 0
+          ? `Booking total: €${n.toFixed(2)} · paid: €${paid.toFixed(2)} · open: €${open.toFixed(2)}`
+          : `Booking total: €${n.toFixed(2)}`);
       } catch { if (alive) setTotalInfo("Could not load booking total."); }
     }
     fetchTotal();

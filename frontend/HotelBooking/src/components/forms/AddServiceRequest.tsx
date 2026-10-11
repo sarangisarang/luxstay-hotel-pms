@@ -147,7 +147,7 @@ export default function AddServiceRequest() {
                   <option value="">{t('selectAService')}</option>
                   {services.map(s => (
                     <option key={s.id} value={s.id}>
-                      {s.name}{s.price != null ? ` — $${Number(s.price).toFixed(2)}` : ""}
+                      {s.name}{s.price != null ? ` — €${Number(s.price).toFixed(2)}` : ""}
                     </option>
                   ))}
                 </select>

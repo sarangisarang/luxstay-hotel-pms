@@ -3,15 +3,25 @@ package com.booksys.stripe;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
+import com.stripe.net.RequestOptions;
 import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Thin wrapper around the Stripe SDK so the booking logic can be unit-tested
+ * with a mock instead of real network calls.
+ */
 @Service
 public class StripeService {
+
+    /** PaymentIntent states in which Stripe still allows {@code cancel()}. */
+    private static final Set<String> CANCELABLE = Set.of(
+            "requires_payment_method", "requires_confirmation", "requires_action", "requires_capture");
 
     @Value("${stripe.secret-key}")
     private String secretKey;
@@ -22,23 +32,23 @@ public class StripeService {
     }
 
     /**
-     * Creates a Stripe PaymentIntent for the given amount.
-     * Amount is in the smallest currency unit (cents for EUR/USD).
+     * Creates a PaymentIntent for an amount the server calculated itself.
      *
-     * @param amount      booking total in major currency units (e.g. 120.50)
-     * @param currency    ISO currency code (e.g. "eur", "usd")
-     * @param description human-readable description shown on Stripe dashboard
-     * @return the created PaymentIntent (contains clientSecret for frontend)
+     * @param amountMinorUnits amount in the smallest currency unit (cents for EUR)
+     * @param currency         ISO currency code, e.g. "EUR"
+     * @param description      text shown in the Stripe dashboard
+     * @param metadata         booking reference data, echoed back in webhooks
+     * @param idempotencyKey   makes a retried request return the same intent
      */
-    public PaymentIntent createPaymentIntent(BigDecimal amount, String currency, String description)
+    public PaymentIntent createPaymentIntent(long amountMinorUnits, String currency, String description,
+                                             Map<String, String> metadata, String idempotencyKey)
             throws StripeException {
 
-        long amountInCents = amount.multiply(BigDecimal.valueOf(100)).longValue();
-
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                .setAmount(amountInCents)
+                .setAmount(amountMinorUnits)
                 .setCurrency(currency.toLowerCase())
                 .setDescription(description)
+                .putAllMetadata(metadata)
                 .setAutomaticPaymentMethods(
                         PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
                                 .setEnabled(true)
@@ -46,13 +56,27 @@ public class StripeService {
                 )
                 .build();
 
-        return PaymentIntent.create(params);
+        RequestOptions options = RequestOptions.builder()
+                .setIdempotencyKey(idempotencyKey)
+                .build();
+        return PaymentIntent.create(params, options);
+    }
+
+    /** Retrieves an existing PaymentIntent by its ID. */
+    public PaymentIntent retrieve(String paymentIntentId) throws StripeException {
+        return PaymentIntent.retrieve(paymentIntentId);
     }
 
     /**
-     * Retrieves an existing PaymentIntent by its ID.
+     * Cancels a PaymentIntent if Stripe still allows it, so an expired booking
+     * hold can no longer be paid.
+     *
+     * @return {@code true} when the intent is (now) cancelled
      */
-    public PaymentIntent retrieve(String paymentIntentId) throws StripeException {
-        return PaymentIntent.retrieve(paymentIntentId);
+    public boolean cancelIfPossible(PaymentIntent intent) throws StripeException {
+        if ("canceled".equals(intent.getStatus())) return true;
+        if (!CANCELABLE.contains(intent.getStatus())) return false;
+        intent.cancel();
+        return true;
     }
 }
